@@ -1212,31 +1212,83 @@
   // ── 8-bit Music Engine ─────────────────────────────────────────────────────
   const MUSIC = (() => {
     let ctx = null, running = false, timer = null, step = 0, nextTime = 0, t0 = 0, hatBuf = null;
+    let activeMel = null, activeBas = null;
 
     const _ = 0;
-    // Melody notes
-    const C5=523,D5=587,E5=659,F5=698,G5=784,A5=880;
-    // Bass notes
-    const C3=131,F3=175,G3=196,A3=220;
+    const C3=131,D3=147,E3=165,F3=175,G3=196,A3=220,B3=247;
+    const C5=523,D5=587,E5=659,F5=698,G5=784,A5=880,B5=988,Fs5=740;
 
-    // 64-step loop (4 bars of 4/4 at 16th-note resolution)
-    // Chord progression: C – Am – F – G → C
-    const MEL = [
-      // Bar 1 – C major, punchy hook
-      E5,E5,_,E5, _,C5,E5,_, G5,G5,_,_, E5,_,_,_,
-      // Bar 2 – A minor, tension
-      A5,_,G5,_,  E5,_,E5,_, C5,D5,E5,G5, A5,_,_,_,
-      // Bar 3 – F major, melodic run
-      F5,A5,_,A5, F5,G5,E5,_, D5,E5,F5,_, G5,_,_,_,
-      // Bar 4 – G → C, resolution
-      G5,F5,E5,D5, C5,E5,G5,_, E5,D5,C5,_, C5,_,_,_,
-    ];
-
-    const BAS = [
-      C3,_,_,_, C3,_,_,_, C3,_,_,_, C3,_,_,_,  // C
-      A3,_,_,_, A3,_,_,_, A3,_,_,_, A3,_,_,_,  // Am
-      F3,_,_,_, F3,_,_,_, F3,_,_,_, F3,_,_,_,  // F
-      G3,_,_,_, G3,_,_,_, C3,_,_,_, C3,_,_,_,  // G → C
+    const SONGS = [
+      { // 1 — C–Am–F–G (original hook)
+        mel: [
+          E5,E5,_,E5, _,C5,E5,_, G5,G5,_,_, E5,_,_,_,
+          A5,_,G5,_,  E5,_,E5,_, C5,D5,E5,G5, A5,_,_,_,
+          F5,A5,_,A5, F5,G5,E5,_, D5,E5,F5,_, G5,_,_,_,
+          G5,F5,E5,D5, C5,E5,G5,_, E5,D5,C5,_, C5,_,_,_,
+        ],
+        bas: [
+          C3,_,_,_, C3,_,_,_, C3,_,_,_, C3,_,_,_,
+          A3,_,_,_, A3,_,_,_, A3,_,_,_, A3,_,_,_,
+          F3,_,_,_, F3,_,_,_, F3,_,_,_, F3,_,_,_,
+          G3,_,_,_, G3,_,_,_, C3,_,_,_, C3,_,_,_,
+        ],
+      },
+      { // 2 — D–G–A–D (bouncy D major)
+        mel: [
+          D5,_,Fs5,_, A5,_,D5,_, Fs5,A5,_,A5, D5,_,_,_,
+          G5,B5,_,G5, A5,_,G5,_, B5,_,A5,_, G5,_,_,_,
+          A5,_,E5,_, A5,G5,Fs5,_, E5,_,D5,_, E5,_,_,_,
+          D5,Fs5,A5,_, D5,A5,Fs5,_, E5,D5,_,_, D5,_,_,_,
+        ],
+        bas: [
+          D3,_,_,_, D3,_,_,_, D3,_,_,_, D3,_,_,_,
+          G3,_,_,_, G3,_,_,_, G3,_,_,_, G3,_,_,_,
+          A3,_,_,_, A3,_,_,_, A3,_,_,_, A3,_,_,_,
+          D3,_,_,_, D3,_,_,_, D3,_,_,_, D3,_,_,_,
+        ],
+      },
+      { // 3 — Am–F–C–G (spooky minor)
+        mel: [
+          A5,_,_,E5, A5,_,G5,_, E5,G5,A5,_, E5,_,_,_,
+          F5,A5,_,G5, F5,_,E5,_, C5,_,D5,F5, E5,_,_,_,
+          C5,E5,G5,_, E5,_,C5,_, G5,_,A5,_, G5,E5,_,_,
+          G5,_,F5,E5, D5,_,E5,_, G5,_,A5,_, G5,_,_,_,
+        ],
+        bas: [
+          A3,_,_,_, A3,_,_,_, A3,_,_,_, A3,_,_,_,
+          F3,_,_,_, F3,_,_,_, F3,_,_,_, F3,_,_,_,
+          C3,_,_,_, C3,_,_,_, C3,_,_,_, C3,_,_,_,
+          G3,_,_,_, G3,_,_,_, G3,_,_,_, G3,_,_,_,
+        ],
+      },
+      { // 4 — Em–C–G–D (heroic minor)
+        mel: [
+          E5,_,G5,_, B5,G5,E5,_, G5,_,B5,_, E5,_,_,_,
+          C5,E5,_,G5, C5,_,E5,_, G5,_,C5,_, E5,_,_,_,
+          G5,_,D5,G5, B5,_,G5,_, D5,G5,_,_, G5,_,_,_,
+          D5,F5,_,A5, D5,_,A5,_, F5,D5,_,_, E5,_,_,_,
+        ],
+        bas: [
+          E3,_,_,_, E3,_,_,_, E3,_,_,_, E3,_,_,_,
+          C3,_,_,_, C3,_,_,_, C3,_,_,_, C3,_,_,_,
+          G3,_,_,_, G3,_,_,_, G3,_,_,_, G3,_,_,_,
+          D3,_,_,_, D3,_,_,_, E3,_,_,_, E3,_,_,_,
+        ],
+      },
+      { // 5 — C–F–G–C (syncopated calypso)
+        mel: [
+          _,C5,_,E5, _,G5,_,E5, _,C5,E5,_, _,G5,_,_,
+          _,F5,_,A5, _,F5,A5,_, _,G5,_,F5, _,E5,_,_,
+          _,G5,_,B5, _,G5,_,D5, _,G5,D5,_, _,G5,_,_,
+          _,E5,G5,_, C5,_,E5,_, G5,E5,_,C5, _,C5,_,_,
+        ],
+        bas: [
+          C3,_,_,C3, _,_,C3,_, _,_,C3,_, _,_,C3,_,
+          F3,_,_,F3, _,_,F3,_, _,_,F3,_, _,_,F3,_,
+          G3,_,_,G3, _,_,G3,_, _,_,G3,_, _,_,G3,_,
+          C3,_,_,C3, _,_,C3,_, _,_,C3,_, _,_,C3,_,
+        ],
+      },
     ];
 
     // 16th-note duration in seconds, interpolating BPM 80→140 over 120s
@@ -1276,8 +1328,8 @@
     function tick() {
       while (nextTime < ctx.currentTime + 0.12) {
         const d = s16(), i = step % 64;
-        tone(MEL[i], nextTime, d * 0.85, 'square', 0.10);
-        tone(BAS[i], nextTime, d * 1.6,  'square', 0.07);
+        tone(activeMel[i], nextTime, d * 0.85, 'square', 0.10);
+        tone(activeBas[i], nextTime, d * 1.6,  'square', 0.07);
         if (i % 4 === 0) hihat(nextTime); // quarter-note hi-hat click
         nextTime += d;
         step++;
@@ -1288,6 +1340,8 @@
     return {
       start() {
         if (ctx) ctx.close();
+        const song = SONGS[Math.floor(Math.random() * SONGS.length)];
+        activeMel = song.mel; activeBas = song.bas;
         ctx = new (window.AudioContext || window.webkitAudioContext)();
         t0 = ctx.currentTime; step = 0; nextTime = t0 + 0.1; running = true; hatBuf = null;
         tick();
@@ -1432,7 +1486,7 @@
 
     // Always fetch the live global score before deciding — fixes cross-device divergence
     const prev = await loadHighScore();
-    const isNewRecord = score > 0 && score > prev;
+    const isNewRecord = score > 0 && score >= prev;
 
     if (isNewRecord) {
       document.getElementById('hsScore').textContent = score;
@@ -1620,7 +1674,7 @@
 
   async function loadHighScore() {
     try {
-      const res = await fetch(BLOB_URL, { headers: { Accept: 'application/json' } });
+      const res = await fetch(BLOB_URL, { headers: { Accept: 'application/json' }, cache: 'no-store' });
       const data = await res.json();
       const hs = data.highScore || 0;
       const initials = data.initials || '';
@@ -1640,7 +1694,7 @@
     // Fetch live global score first so we never overwrite a higher score from another device
     let globalPrev = 0;
     try {
-      const res = await fetch(BLOB_URL, { headers: { Accept: 'application/json' } });
+      const res = await fetch(BLOB_URL, { headers: { Accept: 'application/json' }, cache: 'no-store' });
       const data = await res.json();
       globalPrev = data.highScore || 0;
     } catch {
