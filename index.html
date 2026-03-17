@@ -207,6 +207,82 @@
       z-index: 100;
     }
 
+    /* ── Score Page ── */
+    #scorePage {
+      background: #414241;
+      justify-content: space-between;
+      gap: 0;
+      padding: 0;
+    }
+
+    .score-page-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 60px 24px 0;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .score-page-heading {
+      text-align: center;
+      line-height: 0.9;
+    }
+
+    .score-page-lets {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 400;
+      font-size: clamp(80px, 15vw, 120px);
+      color: #fff4e9;
+      letter-spacing: -0.01em;
+    }
+
+    .score-page-go {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 900;
+      font-size: clamp(120px, 22vw, 200px);
+      color: #fff4e9;
+      letter-spacing: -0.02em;
+      line-height: 0.85;
+    }
+
+    .score-page-result {
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    .score-page-label {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 400;
+      font-size: 32px;
+      color: #fff4e9;
+      opacity: 0.8;
+    }
+
+    .score-page-number {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 900;
+      font-size: clamp(80px, 16vw, 130px);
+      color: #fff4e9;
+      line-height: 1;
+    }
+
+    .score-page-countdown {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 400;
+      font-size: 18px;
+      color: #fff4e9;
+      opacity: 0.5;
+      letter-spacing: 0.02em;
+    }
+
+    .score-page-monster {
+      width: 100%;
+      max-width: 800px;
+      flex-shrink: 0;
+    }
+
     /* ── Start screen splash layout ── */
     #startScreen {
       background: #fff4e9;
@@ -632,6 +708,40 @@
   <button class="btn" id="playAgainBtn">Play again</button>
 </div>
 
+<!-- Score Page (non-high-score game over) -->
+<div class="overlay" id="scorePage" style="display:none">
+  <div class="score-page-content">
+    <div class="score-page-heading">
+      <div class="score-page-lets">LET'S</div>
+      <div class="score-page-go">GO!!</div>
+    </div>
+    <div class="score-page-result">
+      <div class="score-page-label">Your Score</div>
+      <div class="score-page-number" id="scorePageNumber">0</div>
+    </div>
+    <div class="score-page-countdown" id="scorePageCountdown">Returning in 5…</div>
+  </div>
+  <div class="score-page-monster">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 660 800 440" preserveAspectRatio="xMidYMax meet" style="width:100%;display:block;">
+      <polygon points="0 1100 800 1100 800 1055.16 0 860.08 0 1100" fill="#FFF4E9"/>
+      <g>
+        <circle cx="693.26" cy="779.42" r="56.66" fill="none" stroke="#FFF4E9" stroke-miterlimit="10" stroke-width="15.7"/>
+        <circle cx="702.54" cy="804.87" r="12.72" fill="#FFF4E9"/>
+      </g>
+      <g>
+        <circle cx="111.02" cy="747.72" r="56.66" fill="none" stroke="#FFF4E9" stroke-miterlimit="10" stroke-width="15.7"/>
+        <circle cx="123.74" cy="727.79" r="12.72" fill="#FFF4E9"/>
+      </g>
+      <path d="M400.47,939.01l-7.14,60.1c-2.93,24.68-25.31,42.3-49.99,39.37l-59.85-7.11c-24.68-2.93-42.3-25.31-39.37-49.99l7.14-60.1,149.21,17.72Z" fill="#414241"/>
+      <path d="M564.77,987.34l-18.42,57.66c-7.56,23.67-32.88,36.73-56.55,29.17l-57.41-18.34c-23.67-7.56-36.73-32.88-29.17-56.55l18.42-57.66,143.13,45.72Z" fill="#414241"/>
+      <path d="M681.4,1017.08l-10.21,43.31c-4.19,17.78-22.01,28.79-39.79,24.6l-43.12-10.17c-17.78-4.19-28.79-22.01-24.6-39.79l10.21-43.31,107.51,25.36Z" fill="#414241"/>
+      <path d="M800,1024.14l-2.23,44.44c-.92,18.24-16.45,32.29-34.69,31.38l-44.25-2.22c-18.24-.92-32.29-16.45-31.38-34.69l2.23-44.44,110.32,5.53Z" fill="#414241"/>
+      <path d="M127.2,884.76l-17.99,40.7c-7.38,16.71-26.92,24.27-43.62,16.88l-40.53-17.91c-16.71-7.38-24.27-26.92-16.88-43.62l17.99-40.7,101.03,44.66Z" fill="#414241"/>
+      <path d="M241.5,911.64l-10.21,43.31c-4.19,17.78-22.01,28.79-39.79,24.6l-43.12-10.17c-17.78-4.19-28.79-22.01-24.6-39.79l10.21-43.31,107.51,25.36Z" fill="#414241"/>
+    </svg>
+  </div>
+</div>
+
 <script>
   // ── Word list ──────────────────────────────────────────────────────────────
   const WORDS = [
@@ -911,6 +1021,7 @@
   const hiddenInput  = document.getElementById('hiddenInput');
   const startScreen  = document.getElementById('startScreen');
   const gameOverScr  = document.getElementById('gameOverScreen');
+  const scorePageEl  = document.getElementById('scorePage');
 
   // ── Utilities ──────────────────────────────────────────────────────────────
   function shuffle(arr) {
@@ -1026,17 +1137,26 @@
       entry.style.display = 'flex';
       input.value = '';
       setTimeout(() => input.focus(), 100);
+      gameOverScr.style.display = 'flex';
     } else {
-      document.getElementById('initialsEntry').style.display = 'none';
-      msg.textContent = score === 0
-        ? "Don't worry, you'll do better next time!"
-        : score === 1
-          ? 'You spelled 1 word correctly. Great try!'
-          : `You spelled ${score} words correctly. Well done!`;
       await loadHighScore();
+      // Show score page with 5-second countdown back to splash
+      document.getElementById('scorePageNumber').textContent = score;
+      const countdownEl = document.getElementById('scorePageCountdown');
+      scorePageEl.style.display = 'flex';
+      let secs = 5;
+      countdownEl.textContent = `Returning in ${secs}…`;
+      const iv = setInterval(() => {
+        secs--;
+        if (secs <= 0) {
+          clearInterval(iv);
+          scorePageEl.style.display = 'none';
+          startScreen.style.display = 'flex';
+        } else {
+          countdownEl.textContent = `Returning in ${secs}…`;
+        }
+      }, 1000);
     }
-
-    gameOverScr.style.display = 'flex';
   }
 
   // ── Rendering ──────────────────────────────────────────────────────────────
