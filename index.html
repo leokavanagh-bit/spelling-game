@@ -207,6 +207,113 @@
       z-index: 100;
     }
 
+    /* ── Start screen splash layout ── */
+    #startScreen {
+      background: #fff4e9;
+      justify-content: space-between;
+      gap: 0;
+      padding: 0;
+    }
+
+    .splash-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      padding: 60px 24px 0;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .splash-title {
+      text-align: center;
+    }
+
+    .splash-spell-or {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 400;
+      font-size: 80px;
+      color: #414241;
+      line-height: 1.1;
+    }
+
+    .splash-die {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 900;
+      font-size: clamp(100px, 20vw, 170px);
+      color: #CC0000;
+      line-height: 0.95;
+      letter-spacing: -0.01em;
+    }
+
+    /* Splash high score — no box, just text */
+    #startScreen .high-score-display {
+      background: none;
+      border: none;
+      padding: 0;
+      gap: 0;
+    }
+
+    #startScreen .high-score-label {
+      font-size: 18px;
+      color: #414241;
+      opacity: 0.55;
+      letter-spacing: 0.06em;
+    }
+
+    #startScreen .high-score-value {
+      font-size: 72px;
+      color: #414241;
+    }
+
+    #startScreen .high-score-initials {
+      font-size: 18px;
+      color: #414241;
+      opacity: 0.55;
+    }
+
+    /* Alright / LETS GO! button */
+    .btn-start {
+      background: #414241;
+      border: none;
+      border-radius: 0;
+      padding: 14px 52px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      min-width: 285px;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .btn-start:hover  { opacity: 0.85; }
+    .btn-start:active { transform: scale(0.97); }
+
+    .btn-start-sub {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 400;
+      font-size: 20px;
+      color: #fff4e9;
+      line-height: 1.2;
+    }
+
+    .btn-start-main {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 900;
+      font-size: 42px;
+      color: #fff4e9;
+      line-height: 1.1;
+    }
+
+    /* Monster at bottom of splash */
+    .splash-monster {
+      width: 100%;
+      max-width: 800px;
+      align-self: center;
+      flex-shrink: 0;
+    }
+
     .overlay-emoji {
       font-size: 72px;
       line-height: 1;
@@ -456,15 +563,44 @@
 
 <!-- Start Screen -->
 <div class="overlay" id="startScreen">
-  <div class="overlay-emoji">🔤</div>
-  <h1>Spelling Game</h1>
-  <p>Look at the picture and type the word.<br>You have <strong>2 minutes</strong> and <strong>3 lives</strong>. Good luck!</p>
-  <div class="high-score-display" id="highScoreDisplay" style="display:none">
-    <span class="high-score-label">Best score</span>
-    <span class="high-score-value" id="highScoreValue"></span>
-    <span class="high-score-initials" id="highScoreInitials"></span>
+
+  <div class="splash-content">
+    <div class="splash-title">
+      <div class="splash-spell-or">Spell or</div>
+      <div class="splash-die">DIE!!!!</div>
+    </div>
+    <div class="high-score-display" id="highScoreDisplay" style="display:none">
+      <span class="high-score-label">High Score</span>
+      <span class="high-score-value" id="highScoreValue"></span>
+      <span class="high-score-initials" id="highScoreInitials"></span>
+    </div>
+    <button class="btn-start" id="startBtn">
+      <span class="btn-start-sub">Alright</span>
+      <span class="btn-start-main">LETS GO!</span>
+    </button>
   </div>
-  <button class="btn" id="startBtn">Let's go!</button>
+
+  <!-- Monster from BG layer — exact paths from Paper -->
+  <div class="splash-monster">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 660 800 440" preserveAspectRatio="xMidYMax meet" style="width:100%;display:block;">
+      <polygon points="0 1100 800 1100 800 1055.16 0 860.08 0 1100" fill="#414241"/>
+      <g>
+        <circle cx="693.26" cy="779.42" r="56.66" fill="none" stroke="#414241" stroke-miterlimit="10" stroke-width="15.7"/>
+        <circle cx="702.54" cy="804.87" r="12.72" fill="#414241"/>
+      </g>
+      <g>
+        <circle cx="111.02" cy="747.72" r="56.66" fill="none" stroke="#414241" stroke-miterlimit="10" stroke-width="15.7"/>
+        <circle cx="123.74" cy="727.79" r="12.72" fill="#414241"/>
+      </g>
+      <path d="M400.47,939.01l-7.14,60.1c-2.93,24.68-25.31,42.3-49.99,39.37l-59.85-7.11c-24.68-2.93-42.3-25.31-39.37-49.99l7.14-60.1,149.21,17.72Z" fill="#FFF4E9"/>
+      <path d="M564.77,987.34l-18.42,57.66c-7.56,23.67-32.88,36.73-56.55,29.17l-57.41-18.34c-23.67-7.56-36.73-32.88-29.17-56.55l18.42-57.66,143.13,45.72Z" fill="#FFF4E9"/>
+      <path d="M681.4,1017.08l-10.21,43.31c-4.19,17.78-22.01,28.79-39.79,24.6l-43.12-10.17c-17.78-4.19-28.79-22.01-24.6-39.79l10.21-43.31,107.51,25.36Z" fill="#FFF4E9"/>
+      <path d="M800,1024.14l-2.23,44.44c-.92,18.24-16.45,32.29-34.69,31.38l-44.25-2.22c-18.24-.92-32.29-16.45-31.38-34.69l2.23-44.44,110.32,5.53Z" fill="#FFF4E9"/>
+      <path d="M127.2,884.76l-17.99,40.7c-7.38,16.71-26.92,24.27-43.62,16.88l-40.53-17.91c-16.71-7.38-24.27-26.92-16.88-43.62l17.99-40.7,101.03,44.66Z" fill="#FFF4E9"/>
+      <path d="M241.5,911.64l-10.21,43.31c-4.19,17.78-22.01,28.79-39.79,24.6l-43.12-10.17c-17.78-4.19-28.79-22.01-24.6-39.79l10.21-43.31,107.51,25.36Z" fill="#FFF4E9"/>
+    </svg>
+  </div>
+
 </div>
 
 <!-- Game Over Screen -->
