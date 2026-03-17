@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spelling Game</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #FBF2E8;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    .game-container {
+      width: 800px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* ── Time Bar ── */
+    .time-bar-track {
+      width: 100%;
+      height: 26px;
+      background: white;
+      border-radius: 13px;
+      border: 1.5px solid #d0cbc4;
+      overflow: hidden;
+    }
+
+    .time-bar-fill {
+      height: 100%;
+      background: #E05252;
+      border-radius: 13px;
+      width: 100%;
+      transition: width 0.1s linear, background 0.5s ease;
+    }
+
+    /* ── HUD ── */
+    .hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 6px;
+    }
+
+    .lives {
+      display: flex;
+      gap: 8px;
+    }
+
+    .lives span {
+      font-size: 34px;
+      line-height: 1;
+      transition: transform 0.2s ease;
+    }
+
+    .lives span.pop {
+      animation: pop 0.35s ease;
+    }
+
+    .score {
+      font-size: 20px;
+      font-weight: 700;
+      color: #2a2520;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── Windows ── */
+    .window {
+      background: white;
+      border-radius: 20px;
+      border: 1.5px solid #d0cbc4;
+      width: 100%;
+    }
+
+    .window-icon {
+      height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-display {
+      font-size: 180px;
+      line-height: 1;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      user-select: none;
+    }
+
+    .icon-display.new {
+      animation: iconPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .window-text {
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      padding: 40px;
+      cursor: text;
+    }
+
+    /* ── Letter Boxes ── */
+    .letter-boxes {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .letter-box {
+      width: 64px;
+      height: 76px;
+      border-radius: 12px;
+      border: 2px solid #d0cbc4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      font-weight: 800;
+      color: #2a2520;
+      text-transform: uppercase;
+      background: white;
+      transition: border-color 0.15s, color 0.15s, transform 0.15s;
+      user-select: none;
+    }
+
+    .letter-box.active {
+      border-color: #E05252;
+      transform: scale(1.05);
+    }
+
+    .letter-box.correct {
+      border-color: #4caf50;
+      color: #4caf50;
+      animation: letterPop 0.25s ease;
+    }
+
+    .letter-box.wrong {
+      border-color: #E05252;
+      color: #E05252;
+      animation: shake 0.35s ease;
+    }
+
+    /* ── Hint text ── */
+    .hint {
+      font-size: 15px;
+      color: #b0a99f;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Feedback ── */
+    .feedback {
+      font-size: 26px;
+      font-weight: 700;
+      min-height: 38px;
+      text-align: center;
+      letter-spacing: -0.01em;
+    }
+
+    .feedback.correct { color: #4caf50; }
+    .feedback.wrong   { color: #E05252; }
+
+    /* ── Hidden input ── */
+    .hidden-input {
+      position: fixed;
+      top: -999px;
+      left: -999px;
+      opacity: 0;
+      width: 1px;
+      height: 1px;
+    }
+
+    /* ── Overlays ── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(251, 242, 232, 0.96);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      z-index: 100;
+    }
+
+    .overlay-emoji {
+      font-size: 72px;
+      line-height: 1;
+    }
+
+    .overlay h1 {
+      font-size: 52px;
+      font-weight: 800;
+      color: #2a2520;
+      letter-spacing: -0.03em;
+      text-align: center;
+    }
+
+    .overlay p {
+      font-size: 20px;
+      color: #6b6259;
+      text-align: center;
+      max-width: 480px;
+      line-height: 1.5;
+    }
+
+    .overlay .final-score {
+      font-size: 28px;
+      font-weight: 700;
+      color: #2a2520;
+    }
+
+    .btn {
+      margin-top: 8px;
+      background: #E05252;
+      color: white;
+      border: none;
+      border-radius: 16px;
+      padding: 16px 52px;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s, background 0.15s;
+      letter-spacing: -0.01em;
+    }
+
+    .btn:hover  { background: #cc4444; }
+    .btn:active { transform: scale(0.96); }
+
+    /* ── High score ── */
+    .high-score-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      background: white;
+      border: 1.5px solid #d0cbc4;
+      border-radius: 14px;
+      padding: 12px 36px;
+    }
+
+    .high-score-label {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #b0a99f;
+    }
+
+    .high-score-value {
+      font-size: 36px;
+      font-weight: 800;
+      color: #2a2520;
+      letter-spacing: -0.02em;
+    }
+
+    /* ── Pass button ── */
+    .btn-pass {
+      background: none;
+      border: 2px solid #d0cbc4;
+      color: #8a8077;
+      border-radius: 12px;
+      padding: 10px 28px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, transform 0.1s;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-pass:hover  { border-color: #b0a99f; color: #5a5248; }
+    .btn-pass:active { transform: scale(0.96); }
+
+    /* ── Animations ── */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%       { transform: translateX(-7px); }
+      60%       { transform: translateX(7px); }
+      80%       { transform: translateX(-4px); }
+    }
+
+    @keyframes pop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes letterPop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes iconPop {
+      0%   { transform: scale(0.6); opacity: 0; }
+      100% { transform: scale(1);   opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="game-container">
+
+  <!-- Time Bar -->
+  <div class="time-bar-track">
+    <div class="time-bar-fill" id="timeBar"></div>
+  </div>
+
+  <!-- HUD -->
+  <div class="hud">
+    <div class="lives" id="lives"></div>
+    <div class="score" id="score">Score: 0</div>
+  </div>
+
+  <!-- Icon Window -->
+  <div class="window window-icon">
+    <span class="icon-display" id="icon" role="img" aria-label="picture to spell"></span>
+  </div>
+
+  <!-- Spelling Window -->
+  <div class="window window-text" id="windowText">
+    <div class="letter-boxes" id="letterBoxes"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="hint" id="hint">Type on your keyboard to spell the picture above</div>
+    <button class="btn-pass" id="passBtn">Skip this one</button>
+  </div>
+
+</div>
+
+<!-- Hidden keyboard input -->
+<input
+  class="hidden-input"
+  id="hiddenInput"
+  autocomplete="off"
+  autocorrect="off"
+  autocapitalize="off"
+  spellcheck="false"
+>
+
+<!-- Start Screen -->
+<div class="overlay" id="startScreen">
+  <div class="overlay-emoji">🔤</div>
+  <h1>Spelling Game</h1>
+  <p>Look at the picture and type the word.<br>You have <strong>2 minutes</strong> and <strong>3 lives</strong>. Good luck!</p>
+  <div class="high-score-display" id="highScoreDisplay" style="display:none">
+    <span class="high-score-label">Best score</span>
+    <span class="high-score-value" id="highScoreValue"></span>
+  </div>
+  <button class="btn" id="startBtn">Let's go!</button>
+</div>
+
+<!-- Game Over Screen -->
+<div class="overlay" id="gameOverScreen" style="display:none">
+  <div class="overlay-emoji" id="gameOverEmoji"></div>
+  <h1 id="gameOverTitle"></h1>
+  <div class="final-score" id="finalScore"></div>
+  <p id="gameOverMsg"></p>
+  <button class="btn" id="playAgainBtn">Play again</button>
+</div>
+
+<script>
+  // ── Word list ──────────────────────────────────────────────────────────────
+  const WORDS = [
+    { word: 'CAT',       icon: '🐱' },
+    { word: 'DOG',       icon: '🐶' },
+    { word: 'SUN',       icon: '☀️' },
+    { word: 'STAR',      icon: '⭐' },
+    { word: 'MOON',      icon: '🌙' },
+    { word: 'FISH',      icon: '🐟' },
+    { word: 'BIRD',      icon: '🕊️' },
+    { word: 'FROG',      icon: '🐸' },
+    { word: 'BEAR',      icon: '🐻' },
+    { word: 'DUCK',      icon: '🦆' },
+    { word: 'LION',      icon: '🦁' },
+    { word: 'TREE',      icon: '🌳' },
+    { word: 'CAKE',      icon: '🎂' },
+    { word: 'DRUM',      icon: '🥁' },
+    { word: 'BELL',      icon: '🔔' },
+    { word: 'BOOK',      icon: '📖' },
+    { word: 'BALL',      icon: '⚽' },
+    { word: 'BOAT',      icon: '⛵' },
+    { word: 'RAIN',      icon: '🌧️' },
+    { word: 'SNOW',      icon: '❄️' },
+    { word: 'FIRE',      icon: '🔥' },
+    { word: 'LEAF',      icon: '🍁' },
+    { word: 'ROSE',      icon: '🌹' },
+    { word: 'CRAB',      icon: '🦀' },
+    { word: 'WOLF',      icon: '🐺' },
+    { word: 'FAWN',      icon: '🦌' },
+    { word: 'TRAIN',     icon: '🚂' },
+    { word: 'HORSE',     icon: '🐴' },
+    { word: 'SHARK',     icon: '🦈' },
+    { word: 'SNAIL',     icon: '🐌' },
+    { word: 'TIGER',     icon: '🐯' },
+    { word: 'APPLE',     icon: '🍎' },
+    { word: 'GRAPE',     icon: '🍇' },
+    { word: 'LEMON',     icon: '🍋' },
+    { word: 'CLOUD',     icon: '☁️' },
+    { word: 'ROBOT',     icon: '🤖' },
+    { word: 'MOUSE',     icon: '🐭' },
+    { word: 'PIZZA',     icon: '🍕' },
+    { word: 'EARTH',     icon: '🌍' },
+    { word: 'CROWN',     icon: '👑' },
+    { word: 'PIANO',     icon: '🎹' },
+    { word: 'ROCKET',    icon: '🚀' },
+    { word: 'SPIDER',    icon: '🕷️' },
+    { word: 'RABBIT',    icon: '🐰' },
+    { word: 'MONKEY',    icon: '🐵' },
+    { word: 'TURTLE',    icon: '🐢' },
+    { word: 'FLOWER',    icon: '🌸' },
+    { word: 'TOWER',     icon: '🗼' },
+    { word: 'CASTLE',    icon: '🏰' },
+
+    // ── 3-letter words ──
+    { word: 'BEE',      icon: '🐝' },
+    { word: 'OWL',      icon: '🦉' },
+    { word: 'PIG',      icon: '🐷' },
+    { word: 'COW',      icon: '🐄' },
+    { word: 'FOX',      icon: '🦊' },
+    { word: 'BAT',      icon: '🦇' },
+    { word: 'ANT',      icon: '🐜' },
+    { word: 'BUS',      icon: '🚌' },
+    { word: 'HAT',      icon: '🎩' },
+    { word: 'KEY',      icon: '🔑' },
+    { word: 'GEM',      icon: '💎' },
+    { word: 'BOX',      icon: '📦' },
+    { word: 'CUP',      icon: '☕' },
+    { word: 'FLY',      icon: '🪰' },
+    { word: 'MAP',      icon: '🗺️' },
+    { word: 'JAR',      icon: '🫙' },
+    { word: 'NET',      icon: '🥅' },
+
+    // ── 4-letter words ──
+    { word: 'WORM',     icon: '🪱' },
+    { word: 'SWAN',     icon: '🦢' },
+    { word: 'GOAT',     icon: '🐐' },
+    { word: 'LAMB',     icon: '🐑' },
+    { word: 'DEER',     icon: '🦌' },
+    { word: 'PEAR',     icon: '🍐' },
+    { word: 'CORN',     icon: '🌽' },
+    { word: 'BIKE',     icon: '🚲' },
+    { word: 'KITE',     icon: '🪁' },
+    { word: 'COIN',     icon: '🪙' },
+    { word: 'RING',     icon: '💍' },
+    { word: 'SOCK',     icon: '🧦' },
+    { word: 'SHOE',     icon: '👟' },
+    { word: 'WAND',     icon: '🪄' },
+    { word: 'YARN',     icon: '🧶' },
+    { word: 'SLED',     icon: '🛷' },
+    { word: 'VASE',     icon: '🏺' },
+    { word: 'FLAG',     icon: '🚩' },
+    { word: 'GIFT',     icon: '🎁' },
+    { word: 'DICE',     icon: '🎲' },
+    { word: 'LOCK',     icon: '🔒' },
+    { word: 'PALM',     icon: '🌴' },
+    { word: 'WAVE',     icon: '🌊' },
+    { word: 'SEED',     icon: '🌰' },
+    { word: 'TACO',     icon: '🌮' },
+    { word: 'HORN',     icon: '📯' },
+    { word: 'TENT',     icon: '⛺' },
+    { word: 'COMB',     icon: '🪮' },
+
+    // ── 5-letter words ──
+    { word: 'WHALE',    icon: '🐳' },
+    { word: 'LLAMA',    icon: '🦙' },
+    { word: 'CAMEL',    icon: '🐪' },
+    { word: 'HIPPO',    icon: '🦛' },
+    { word: 'RHINO',    icon: '🦏' },
+    { word: 'OTTER',    icon: '🦦' },
+    { word: 'ZEBRA',    icon: '🦓' },
+    { word: 'PANDA',    icon: '🐼' },
+    { word: 'KOALA',    icon: '🐨' },
+    { word: 'SQUID',    icon: '🦑' },
+    { word: 'EAGLE',    icon: '🦅' },
+    { word: 'BREAD',    icon: '🍞' },
+    { word: 'MANGO',    icon: '🥭' },
+    { word: 'MELON',    icon: '🍉' },
+    { word: 'ONION',    icon: '🧅' },
+    { word: 'PEACH',    icon: '🍑' },
+    { word: 'SHIRT',    icon: '👕' },
+    { word: 'CHAIR',    icon: '🪑' },
+    { word: 'CLOCK',    icon: '⏰' },
+    { word: 'GLOVE',    icon: '🥊' },
+    { word: 'PHONE',    icon: '📱' },
+    { word: 'TORCH',    icon: '🔦' },
+    { word: 'TRUCK',    icon: '🚛' },
+    { word: 'STORM',    icon: '⛈️' },
+    { word: 'BROOM',    icon: '🧹' },
+    { word: 'DONUT',    icon: '🍩' },
+    { word: 'SCARF',    icon: '🧣' },
+    { word: 'BRUSH',    icon: '🪥' },
+    { word: 'PLANE',    icon: '✈️' },
+    { word: 'SWORD',    icon: '🗡️' },
+
+    // ── 6-letter words ──
+    { word: 'PARROT',   icon: '🦜' },
+    { word: 'LIZARD',   icon: '🦎' },
+    { word: 'CHERRY',   icon: '🍒' },
+    { word: 'CARROT',   icon: '🥕' },
+    { word: 'COOKIE',   icon: '🍪' },
+    { word: 'BANANA',   icon: '🍌' },
+    { word: 'BURGER',   icon: '🍔' },
+    { word: 'POTATO',   icon: '🥔' },
+    { word: 'GUITAR',   icon: '🎸' },
+    { word: 'CAMERA',   icon: '📷' },
+    { word: 'BUCKET',   icon: '🪣' },
+    { word: 'MAGNET',   icon: '🧲' },
+    { word: 'MIRROR',   icon: '🪞' },
+    { word: 'PENCIL',   icon: '✏️' },
+    { word: 'SHIELD',   icon: '🛡️' },
+    { word: 'TROPHY',   icon: '🏆' },
+    { word: 'CACTUS',   icon: '🌵' },
+    { word: 'DESERT',   icon: '🏜️' },
+    { word: 'ISLAND',   icon: '🏝️' },
+    { word: 'FOREST',   icon: '🌲' },
+    { word: 'CANDLE',   icon: '🕯️' },
+    { word: 'TICKET',   icon: '🎫' },
+
+    // ── 7-letter words ──
+    { word: 'PENGUIN',  icon: '🐧' },
+    { word: 'DOLPHIN',  icon: '🐬' },
+    { word: 'GORILLA',  icon: '🦍' },
+    { word: 'LOBSTER',  icon: '🦞' },
+    { word: 'VOLCANO',  icon: '🌋' },
+    { word: 'RAINBOW',  icon: '🌈' },
+    { word: 'TRUMPET',  icon: '🎺' },
+  ];
+
+  // ── Config ─────────────────────────────────────────────────────────────────
+  const GAME_DURATION = 120; // seconds
+  const MAX_LIVES = 3;
+  const HS_KEY = 'spellingGame_highScore';
+
+  // ── State ──────────────────────────────────────────────────────────────────
+  let lives, score, timeLeft, timerInterval, currentWord, typed, wordPool, feedbackTimeout, gameActive;
+
+  // ── DOM refs ───────────────────────────────────────────────────────────────
+  const timeBarEl    = document.getElementById('timeBar');
+  const livesEl      = document.getElementById('lives');
+  const scoreEl      = document.getElementById('score');
+  const iconEl       = document.getElementById('icon');
+  const letterBoxes  = document.getElementById('letterBoxes');
+  const feedbackEl   = document.getElementById('feedback');
+  const hintEl       = document.getElementById('hint');
+  const passBtnEl    = document.getElementById('passBtn');
+  const hiddenInput  = document.getElementById('hiddenInput');
+  const startScreen  = document.getElementById('startScreen');
+  const gameOverScr  = document.getElementById('gameOverScreen');
+
+  // ── Utilities ──────────────────────────────────────────────────────────────
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function refillPool() {
+    wordPool = shuffle(WORDS);
+  }
+
+  // ── Game control ───────────────────────────────────────────────────────────
+  function startGame() {
+    startScreen.style.display  = 'none';
+    gameOverScr.style.display  = 'none';
+    lives      = MAX_LIVES;
+    score      = 0;
+    timeLeft   = GAME_DURATION;
+    gameActive = true;
+    refillPool();
+    updateHUD();
+    updateTimerBar();
+    nextWord();
+    startTimer();
+    hiddenInput.focus();
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft -= 0.1;
+      if (timeLeft <= 0) {
+        timeLeft = 0;
+        clearInterval(timerInterval);
+        updateTimerBar();
+        endGame('time');
+      } else {
+        updateTimerBar();
+      }
+    }, 100);
+  }
+
+  function nextWord() {
+    if (wordPool.length === 0) refillPool();
+    currentWord = wordPool.pop();
+    typed = '';
+    clearFeedback();
+    renderBoxes();
+
+    // Animate icon in
+    iconEl.classList.remove('new');
+    void iconEl.offsetWidth; // reflow
+    iconEl.textContent = currentWord.icon;
+    iconEl.setAttribute('aria-label', currentWord.word.toLowerCase());
+    iconEl.classList.add('new');
+
+    hintEl.style.display = '';
+    passBtnEl.style.display = '';
+    hiddenInput.value = '';
+    hiddenInput.focus();
+  }
+
+  function passWord() {
+    if (!gameActive) return;
+    clearTimeout(feedbackTimeout);
+    showFeedback(`It was: ${currentWord.word}`, 'wrong');
+    hintEl.style.display = 'none';
+    passBtnEl.style.display = 'none';
+    feedbackTimeout = setTimeout(nextWord, 1200);
+  }
+
+  function endGame(reason) {
+    clearInterval(timerInterval);
+    gameActive = false;
+
+    const emoji = document.getElementById('gameOverEmoji');
+    const title = document.getElementById('gameOverTitle');
+    const msg   = document.getElementById('gameOverMsg');
+    const fs    = document.getElementById('finalScore');
+
+    if (reason === 'time') {
+      emoji.textContent = '⏰';
+      title.textContent = "Time's up!";
+    } else {
+      emoji.textContent = '💔';
+      title.textContent = 'No more lives!';
+    }
+
+    fs.textContent = `Score: ${score}`;
+    const isNewRecord = saveHighScore(score);
+    msg.textContent = isNewRecord && score > 0
+      ? '🏆 New high score! Amazing!'
+      : score === 0
+        ? "Don't worry, you'll do better next time!"
+        : score === 1
+          ? 'You spelled 1 word correctly. Great try!'
+          : `You spelled ${score} words correctly. Well done!`;
+
+    loadHighScore(); // refresh the splash display
+    gameOverScr.style.display = 'flex';
+  }
+
+  // ── Rendering ──────────────────────────────────────────────────────────────
+  function renderBoxes(state) {
+    // state: undefined | 'correct' | 'wrong'
+    letterBoxes.innerHTML = '';
+    for (let i = 0; i < currentWord.word.length; i++) {
+      const box = document.createElement('div');
+      box.className = 'letter-box';
+      if (state) {
+        box.classList.add(state);
+      } else if (i === typed.length) {
+        box.classList.add('active');
+      }
+      if (i < typed.length) box.textContent = typed[i];
+      letterBoxes.appendChild(box);
+    }
+  }
+
+  function updateHUD() {
+    livesEl.innerHTML = '';
+    for (let i = 0; i < MAX_LIVES; i++) {
+      const span = document.createElement('span');
+      span.textContent = i < lives ? '❤️' : '🤍';
+      livesEl.appendChild(span);
+    }
+    scoreEl.textContent = 'Score: ' + score;
+  }
+
+  function updateTimerBar() {
+    const pct = Math.max(0, (timeLeft / GAME_DURATION) * 100);
+    timeBarEl.style.width = pct + '%';
+    // Shift from red → orange as time runs low
+    if (pct > 30) {
+      timeBarEl.style.background = '#E05252';
+    } else if (pct > 15) {
+      timeBarEl.style.background = '#E07A30';
+    } else {
+      timeBarEl.style.background = '#E05252';
+    }
+  }
+
+  function clearFeedback() {
+    clearTimeout(feedbackTimeout);
+    feedbackEl.textContent = '';
+    feedbackEl.className = 'feedback';
+  }
+
+  function showFeedback(text, type) {
+    feedbackEl.textContent = text;
+    feedbackEl.className = 'feedback ' + type;
+  }
+
+  // ── Answer checking ────────────────────────────────────────────────────────
+  function checkAnswer() {
+    if (typed === currentWord.word) {
+      // Correct!
+      score++;
+      updateHUD();
+      renderBoxes('correct');
+      showFeedback('Correct! 🎉', 'correct');
+      hintEl.style.display = 'none';
+      passBtnEl.style.display = 'none';
+      feedbackTimeout = setTimeout(nextWord, 900);
+    } else {
+      // Wrong
+      lives--;
+      updateHUD();
+      // Animate lost heart
+      const hearts = livesEl.querySelectorAll('span');
+      if (hearts[lives]) {
+        hearts[lives].classList.add('pop');
+      }
+      renderBoxes('wrong');
+      showFeedback('Oops! Try again 💪', 'wrong');
+      hintEl.style.display = 'none';
+      passBtnEl.style.display = 'none';
+      feedbackTimeout = setTimeout(() => {
+        if (lives <= 0) {
+          endGame('lives');
+        } else {
+          typed = '';
+          renderBoxes();
+          clearFeedback();
+          hintEl.style.display = '';
+          passBtnEl.style.display = '';
+        }
+      }, 900);
+    }
+  }
+
+  // ── Keyboard handling ──────────────────────────────────────────────────────
+  function handleKey(e) {
+    if (!gameActive) return;
+    const key = e.key.toUpperCase();
+
+    if (e.key === 'Backspace') {
+      if (typed.length > 0) {
+        typed = typed.slice(0, -1);
+        renderBoxes();
+        clearFeedback();
+        hintEl.style.display = '';
+      }
+      return;
+    }
+
+    if (!/^[A-Z]$/.test(key)) return;
+    if (typed.length >= currentWord.word.length) return;
+
+    typed += key;
+    renderBoxes();
+    hintEl.style.display = 'none';
+
+    if (typed.length === currentWord.word.length) {
+      checkAnswer();
+    }
+  }
+
+  // ── Event listeners ────────────────────────────────────────────────────────
+  document.addEventListener('keydown', handleKey);
+
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('playAgainBtn').addEventListener('click', startGame);
+  passBtnEl.addEventListener('click', passWord);
+
+  // ── High score ─────────────────────────────────────────────────────────────
+  function loadHighScore() {
+    const hs = parseInt(localStorage.getItem(HS_KEY), 10);
+    const el = document.getElementById('highScoreDisplay');
+    if (hs > 0) {
+      document.getElementById('highScoreValue').textContent = hs;
+      el.style.display = 'flex';
+    } else {
+      el.style.display = 'none';
+    }
+    return hs || 0;
+  }
+
+  function saveHighScore(newScore) {
+    const prev = parseInt(localStorage.getItem(HS_KEY), 10) || 0;
+    if (newScore > prev) {
+      localStorage.setItem(HS_KEY, newScore);
+      return true; // new record
+    }
+    return false;
+  }
+
+  // Load on startup
+  loadHighScore();
+
+  document.getElementById('windowText').addEventListener('click', () => {
+    hiddenInput.focus();
+  });
+
+  hiddenInput.addEventListener('blur', () => {
+    if (gameActive) hiddenInput.focus();
+  });
+</script>
+</body>
+</html>
