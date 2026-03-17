@@ -737,7 +737,7 @@
     feedbackTimeout = setTimeout(nextWord, 1200);
   }
 
-  function endGame(reason) {
+  async function endGame(reason) {
     clearInterval(timerInterval);
     gameActive = false;
     MUSIC.stop();
@@ -756,7 +756,7 @@
     }
 
     fs.textContent = `Score: ${score}`;
-    const isNewRecord = saveHighScore(score);
+    const isNewRecord = await saveHighScore(score);
     msg.textContent = isNewRecord && score > 0
       ? '🏆 New high score! Amazing!'
       : score === 0
@@ -765,7 +765,7 @@
           ? 'You spelled 1 word correctly. Great try!'
           : `You spelled ${score} words correctly. Well done!`;
 
-    loadHighScore(); // refresh the splash display
+    await loadHighScore(); // refresh the splash display with latest global score
     gameOverScr.style.display = 'flex';
   }
 
@@ -898,9 +898,10 @@
   document.getElementById('playAgainBtn').addEventListener('click', startGame);
   passBtnEl.addEventListener('click', passWord);
 
-  // ── High score ─────────────────────────────────────────────────────────────
-  function loadHighScore() {
-    const hs = parseInt(localStorage.getItem(HS_KEY), 10);
+  // ── High score (global via JSONblob, localStorage as cache/fallback) ────────
+  const BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019cf97f-a684-7291-85b4-cc9b48591da6';
+
+  function showHighScoreDisplay(hs) {
     const el = document.getElementById('highScoreDisplay');
     if (hs > 0) {
       document.getElementById('highScoreValue').textContent = hs;
@@ -908,16 +909,35 @@
     } else {
       el.style.display = 'none';
     }
-    return hs || 0;
   }
 
-  function saveHighScore(newScore) {
-    const prev = parseInt(localStorage.getItem(HS_KEY), 10) || 0;
-    if (newScore > prev) {
-      localStorage.setItem(HS_KEY, newScore);
-      return true; // new record
+  async function loadHighScore() {
+    try {
+      const res = await fetch(BLOB_URL, { headers: { Accept: 'application/json' } });
+      const data = await res.json();
+      const hs = data.highScore || 0;
+      localStorage.setItem(HS_KEY, hs); // keep local cache in sync
+      showHighScoreDisplay(hs);
+      return hs;
+    } catch {
+      const hs = parseInt(localStorage.getItem(HS_KEY), 10) || 0;
+      showHighScoreDisplay(hs);
+      return hs;
     }
-    return false;
+  }
+
+  async function saveHighScore(newScore) {
+    const prev = parseInt(localStorage.getItem(HS_KEY), 10) || 0;
+    if (newScore <= prev) return false;
+    localStorage.setItem(HS_KEY, newScore);
+    try {
+      await fetch(BLOB_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ highScore: newScore }),
+      });
+    } catch { /* silent fail — localStorage already updated */ }
+    return true;
   }
 
   // Load on startup
