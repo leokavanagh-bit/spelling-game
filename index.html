@@ -4,12 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spelling Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;900&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: #FBF2E8;
-      font-family: system-ui, -apple-system, sans-serif;
+      background: #fff4e9;
+      font-family: 'Roboto', sans-serif;
       display: flex;
       justify-content: center;
       align-items: flex-start;
@@ -21,25 +23,25 @@
       width: 800px;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 16px;
     }
 
     /* ── Time Bar ── */
     .time-bar-track {
       width: 100%;
       height: 26px;
-      background: white;
-      border-radius: 13px;
-      border: 1.5px solid #d0cbc4;
+      background: #fff4e9;
+      border-radius: 0;
+      border: 3px solid #414241;
       overflow: hidden;
     }
 
     .time-bar-fill {
       height: 100%;
-      background: #E05252;
-      border-radius: 13px;
+      background: #414241;
+      border-radius: 0;
       width: 100%;
-      transition: width 0.1s linear, background 0.5s ease;
+      transition: width 0.1s linear;
     }
 
     /* ── HUD ── */
@@ -47,41 +49,47 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0 6px;
+      padding: 0 4px;
     }
 
     .lives {
       display: flex;
-      gap: 8px;
+      gap: 10px;
+      align-items: center;
     }
 
-    .lives span {
-      font-size: 34px;
-      line-height: 1;
-      transition: transform 0.2s ease;
+    /* ── Eyeball lives ── */
+    .eyeball { display: block; overflow: visible; }
+
+    .eyeball .pupil {
+      transform-origin: 25px 25px;
+      animation: lookAround 4s ease-in-out infinite;
     }
 
-    .lives span.pop {
-      animation: pop 0.35s ease;
-    }
+    .eyeball-0 .pupil { animation-delay: 0s; }
+    .eyeball-1 .pupil { animation-delay: 1.3s; }
+    .eyeball-2 .pupil { animation-delay: 2.6s; }
+
+    .eyeball.dead-eye { animation: eyeDeath 0.3s ease forwards; }
 
     .score {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 400;
       font-size: 20px;
-      font-weight: 700;
-      color: #2a2520;
-      letter-spacing: -0.01em;
+      color: #414241;
+      letter-spacing: 0;
     }
 
     /* ── Windows ── */
     .window {
-      background: white;
-      border-radius: 20px;
-      border: 1.5px solid #d0cbc4;
+      background: #fff4e9;
+      border-radius: 0;
+      border: 3px solid #414241;
       width: 100%;
     }
 
     .window-icon {
-      height: 420px;
+      height: 380px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -90,7 +98,6 @@
     .icon-display {
       font-size: 180px;
       line-height: 1;
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       user-select: none;
     }
 
@@ -99,13 +106,13 @@
     }
 
     .window-text {
-      min-height: 260px;
+      min-height: 240px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 28px;
-      padding: 40px;
+      gap: 24px;
+      padding: 36px 40px;
       cursor: text;
     }
 
@@ -118,57 +125,64 @@
     }
 
     .letter-box {
-      width: 64px;
-      height: 76px;
-      border-radius: 12px;
-      border: 2px solid #d0cbc4;
+      width: 68px;
+      height: 68px;
+      border-radius: 0;
+      border: 3px solid #414241;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 36px;
-      font-weight: 800;
-      color: #2a2520;
+      font-family: 'Roboto', sans-serif;
+      font-size: 34px;
+      font-weight: 900;
+      color: #414241;
       text-transform: uppercase;
-      background: white;
+      background: #fff4e9;
       transition: border-color 0.15s, color 0.15s, transform 0.15s;
       user-select: none;
     }
 
     .letter-box.active {
-      border-color: #E05252;
-      transform: scale(1.05);
+      border-color: #414241;
+      border-width: 4px;
+      transform: scale(1.08);
     }
 
     .letter-box.correct {
-      border-color: #4caf50;
-      color: #4caf50;
+      border-color: #414241;
+      color: #414241;
+      background: #d6f0d6;
       animation: letterPop 0.25s ease;
     }
 
     .letter-box.wrong {
-      border-color: #E05252;
-      color: #E05252;
+      border-color: #414241;
+      color: #414241;
+      background: #f5d5d5;
       animation: shake 0.35s ease;
     }
 
     /* ── Hint text ── */
     .hint {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 400;
       font-size: 15px;
-      color: #b0a99f;
-      letter-spacing: 0.02em;
+      color: #41424180;
+      letter-spacing: 0.01em;
     }
 
     /* ── Feedback ── */
     .feedback {
-      font-size: 26px;
-      font-weight: 700;
-      min-height: 38px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      min-height: 36px;
       text-align: center;
-      letter-spacing: -0.01em;
+      color: #414241;
     }
 
-    .feedback.correct { color: #4caf50; }
-    .feedback.wrong   { color: #E05252; }
+    .feedback.correct { color: #414241; }
+    .feedback.wrong   { color: #414241; }
 
     /* ── Hidden input ── */
     .hidden-input {
@@ -184,7 +198,7 @@
     .overlay {
       position: fixed;
       inset: 0;
-      background: rgba(251, 242, 232, 0.96);
+      background: rgba(255, 244, 233, 0.97);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -199,43 +213,47 @@
     }
 
     .overlay h1 {
+      font-family: 'Roboto', sans-serif;
       font-size: 52px;
-      font-weight: 800;
-      color: #2a2520;
-      letter-spacing: -0.03em;
+      font-weight: 900;
+      color: #414241;
       text-align: center;
     }
 
     .overlay p {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 400;
       font-size: 20px;
-      color: #6b6259;
+      color: #414241;
       text-align: center;
       max-width: 480px;
       line-height: 1.5;
     }
 
     .overlay .final-score {
+      font-family: 'Roboto', sans-serif;
       font-size: 28px;
-      font-weight: 700;
-      color: #2a2520;
+      font-weight: 900;
+      color: #414241;
     }
 
     .btn {
       margin-top: 8px;
-      background: #E05252;
-      color: white;
+      background: #414241;
+      color: #fff4e9;
       border: none;
-      border-radius: 16px;
+      border-radius: 0;
       padding: 16px 52px;
+      font-family: 'Roboto', sans-serif;
       font-size: 20px;
-      font-weight: 700;
+      font-weight: 900;
       cursor: pointer;
-      transition: transform 0.1s, background 0.15s;
-      letter-spacing: -0.01em;
+      transition: transform 0.1s, opacity 0.15s;
+      letter-spacing: 0.02em;
     }
 
-    .btn:hover  { background: #cc4444; }
-    .btn:active { transform: scale(0.96); }
+    .btn:hover  { opacity: 0.85; }
+    .btn:active { transform: scale(0.97); }
 
     /* ── High score ── */
     .high-score-display {
@@ -243,33 +261,35 @@
       flex-direction: column;
       align-items: center;
       gap: 2px;
-      background: white;
-      border: 1.5px solid #d0cbc4;
-      border-radius: 14px;
+      background: #fff4e9;
+      border: 3px solid #414241;
+      border-radius: 0;
       padding: 12px 36px;
     }
 
     .high-score-label {
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
+      font-family: 'Roboto', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: #b0a99f;
+      color: #41424180;
     }
 
     .high-score-value {
+      font-family: 'Roboto', sans-serif;
       font-size: 36px;
-      font-weight: 800;
-      color: #2a2520;
-      letter-spacing: -0.02em;
+      font-weight: 900;
+      color: #414241;
     }
 
     .high-score-initials {
+      font-family: 'Roboto', sans-serif;
       font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
+      font-weight: 400;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: #b0a99f;
+      color: #41424180;
     }
 
     /* ── Initials entry ── */
@@ -281,9 +301,10 @@
     }
 
     .initials-label {
+      font-family: 'Roboto', sans-serif;
       font-size: 15px;
-      font-weight: 600;
-      color: #6b6259;
+      font-weight: 400;
+      color: #414241;
       letter-spacing: 0.01em;
     }
 
@@ -296,65 +317,84 @@
     .initials-input {
       width: 90px;
       height: 56px;
-      border: 2px solid #d0cbc4;
-      border-radius: 12px;
-      background: white;
+      border: 3px solid #414241;
+      border-radius: 0;
+      background: #fff4e9;
+      font-family: 'Roboto', sans-serif;
       font-size: 28px;
-      font-weight: 800;
+      font-weight: 900;
       text-align: center;
       text-transform: uppercase;
-      color: #2a2520;
+      color: #414241;
       letter-spacing: 0.15em;
       outline: none;
-      transition: border-color 0.15s;
+      transition: opacity 0.15s;
     }
 
-    .initials-input:focus { border-color: #E05252; }
+    .initials-input:focus { opacity: 1; }
 
     .btn-confirm {
       width: 56px;
       height: 56px;
-      border-radius: 12px;
-      border: none;
-      background: #4caf50;
-      color: white;
+      border-radius: 0;
+      border: 3px solid #414241;
+      background: #414241;
+      color: #fff4e9;
       font-size: 24px;
       cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
+      transition: opacity 0.15s, transform 0.1s;
     }
 
-    .btn-confirm:hover  { background: #43a047; }
+    .btn-confirm:hover  { opacity: 0.8; }
     .btn-confirm:active { transform: scale(0.95); }
 
-    /* ── Pass button ── */
+    /* ── NEXT button (pass) ── */
     .btn-pass {
-      background: none;
-      border: 2px solid #d0cbc4;
-      color: #8a8077;
-      border-radius: 12px;
-      padding: 10px 28px;
-      font-size: 16px;
-      font-weight: 600;
+      width: 100%;
+      background: #414241;
+      border: none;
+      color: #fff4e9;
+      border-radius: 0;
+      padding: 18px 24px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 18px;
+      font-weight: 400;
       cursor: pointer;
-      transition: border-color 0.15s, color 0.15s, transform 0.1s;
+      transition: opacity 0.15s, transform 0.1s;
       letter-spacing: 0.01em;
+      text-align: center;
     }
 
-    .btn-pass:hover  { border-color: #b0a99f; color: #5a5248; }
-    .btn-pass:active { transform: scale(0.96); }
+    .btn-pass:hover  { opacity: 0.85; }
+    .btn-pass:active { transform: scale(0.98); }
+
+    .btn-pass strong {
+      font-weight: 900;
+    }
 
     /* ── Animations ── */
+    @keyframes lookAround {
+      0%   { transform: translate(0px,   0px);  }
+      10%  { transform: translate(8px,  -3px);  }
+      25%  { transform: translate(5px,   8px);  }
+      40%  { transform: translate(-8px,  4px);  }
+      55%  { transform: translate(-5px, -8px);  }
+      70%  { transform: translate(7px,   3px);  }
+      85%  { transform: translate(-3px,  7px);  }
+      100% { transform: translate(0px,   0px);  }
+    }
+
+    @keyframes eyeDeath {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.3) rotate(15deg); }
+      100% { transform: scale(1); }
+    }
+
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
       20%       { transform: translateX(-7px); }
       60%       { transform: translateX(7px); }
       80%       { transform: translateX(-4px); }
-    }
-
-    @keyframes pop {
-      0%   { transform: scale(1); }
-      50%  { transform: scale(1.3); }
-      100% { transform: scale(1); }
     }
 
     @keyframes letterPop {
@@ -399,7 +439,7 @@
     <div class="letter-boxes" id="letterBoxes"></div>
     <div class="feedback" id="feedback"></div>
     <div class="hint" id="hint">Type on your keyboard to spell the picture above</div>
-    <button class="btn-pass" id="passBtn">Skip this one</button>
+    <button class="btn-pass" id="passBtn">Screw it, <strong>NEXT!!!</strong></button>
   </div>
 
 </div>
@@ -880,12 +920,27 @@
     }
   }
 
+  function makeEyeball(alive, index) {
+    if (alive) {
+      return `<svg class="eyeball eyeball-${index}" viewBox="0 0 50 50" width="46" height="46" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="25" cy="25" r="21" fill="none" stroke="#414241" stroke-width="3"/>
+        <circle class="pupil" cx="25" cy="25" r="9" fill="#414241"/>
+      </svg>`;
+    } else {
+      return `<svg class="eyeball dead-eye" viewBox="0 0 50 50" width="46" height="46" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="25" cy="25" r="21" fill="none" stroke="#414241" stroke-width="3"/>
+        <line x1="13" y1="13" x2="37" y2="37" stroke="#414241" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="37" y1="13" x2="13" y2="37" stroke="#414241" stroke-width="3.5" stroke-linecap="round"/>
+      </svg>`;
+    }
+  }
+
   function updateHUD() {
     livesEl.innerHTML = '';
     for (let i = 0; i < MAX_LIVES; i++) {
-      const span = document.createElement('span');
-      span.textContent = i < lives ? '❤️' : '🤍';
-      livesEl.appendChild(span);
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = makeEyeball(i < lives, i);
+      livesEl.appendChild(wrapper.firstChild);
     }
     scoreEl.textContent = 'Score: ' + score;
   }
@@ -893,14 +948,6 @@
   function updateTimerBar() {
     const pct = Math.max(0, (timeLeft / GAME_DURATION) * 100);
     timeBarEl.style.width = pct + '%';
-    // Shift from red → orange as time runs low
-    if (pct > 30) {
-      timeBarEl.style.background = '#E05252';
-    } else if (pct > 15) {
-      timeBarEl.style.background = '#E07A30';
-    } else {
-      timeBarEl.style.background = '#E05252';
-    }
   }
 
   function clearFeedback() {
@@ -939,8 +986,6 @@
       } else {
         lives--;
         updateHUD();
-        const hearts = livesEl.querySelectorAll('span');
-        if (hearts[lives]) hearts[lives].classList.add('pop');
         renderBoxes('wrong');
         showFeedback('Oops! Try again 💪', 'wrong');
         feedbackTimeout = setTimeout(() => {
