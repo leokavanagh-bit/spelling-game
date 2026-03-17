@@ -1430,7 +1430,8 @@
 
     fs.textContent = `Score: ${score}`;
 
-    const prev = parseInt(localStorage.getItem(HS_KEY), 10) || 0;
+    // Always fetch the live global score before deciding — fixes cross-device divergence
+    const prev = await loadHighScore();
     const isNewRecord = score > 0 && score > prev;
 
     if (isNewRecord) {
@@ -1636,8 +1637,16 @@
   }
 
   async function saveHighScore(newScore, initials) {
-    const prev = parseInt(localStorage.getItem(HS_KEY), 10) || 0;
-    if (newScore <= prev) return false;
+    // Fetch live global score first so we never overwrite a higher score from another device
+    let globalPrev = 0;
+    try {
+      const res = await fetch(BLOB_URL, { headers: { Accept: 'application/json' } });
+      const data = await res.json();
+      globalPrev = data.highScore || 0;
+    } catch {
+      globalPrev = parseInt(localStorage.getItem(HS_KEY), 10) || 0;
+    }
+    if (newScore <= globalPrev) return false;
     localStorage.setItem(HS_KEY, newScore);
     localStorage.setItem(HS_KEY + '_initials', initials);
     try {
