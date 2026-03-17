@@ -541,6 +541,97 @@
     { word: 'TRUMPET',  icon: '🎺' },
   ];
 
+  // ── 8-bit Music Engine ─────────────────────────────────────────────────────
+  const MUSIC = (() => {
+    let ctx = null, running = false, timer = null, step = 0, nextTime = 0, t0 = 0, hatBuf = null;
+
+    const _ = 0;
+    // Melody notes
+    const C5=523,D5=587,E5=659,F5=698,G5=784,A5=880;
+    // Bass notes
+    const C3=131,F3=175,G3=196,A3=220;
+
+    // 64-step loop (4 bars of 4/4 at 16th-note resolution)
+    // Chord progression: C – Am – F – G → C
+    const MEL = [
+      // Bar 1 – C major, punchy hook
+      E5,E5,_,E5, _,C5,E5,_, G5,G5,_,_, E5,_,_,_,
+      // Bar 2 – A minor, tension
+      A5,_,G5,_,  E5,_,E5,_, C5,D5,E5,G5, A5,_,_,_,
+      // Bar 3 – F major, melodic run
+      F5,A5,_,A5, F5,G5,E5,_, D5,E5,F5,_, G5,_,_,_,
+      // Bar 4 – G → C, resolution
+      G5,F5,E5,D5, C5,E5,G5,_, E5,D5,C5,_, C5,_,_,_,
+    ];
+
+    const BAS = [
+      C3,_,_,_, C3,_,_,_, C3,_,_,_, C3,_,_,_,  // C
+      A3,_,_,_, A3,_,_,_, A3,_,_,_, A3,_,_,_,  // Am
+      F3,_,_,_, F3,_,_,_, F3,_,_,_, F3,_,_,_,  // F
+      G3,_,_,_, G3,_,_,_, C3,_,_,_, C3,_,_,_,  // G → C
+    ];
+
+    // 16th-note duration in seconds, interpolating BPM 80→140 over 120s
+    function s16() {
+      const elapsed = ctx.currentTime - t0;
+      const bpm = 80 + 60 * Math.min(1, elapsed / 120);
+      return 15 / bpm;
+    }
+
+    function tone(freq, when, dur, type, vol) {
+      if (!freq) return;
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.connect(g); g.connect(ctx.destination);
+      osc.type = type; osc.frequency.value = freq;
+      g.gain.setValueAtTime(0, when);
+      g.gain.linearRampToValueAtTime(vol, when + 0.005);
+      g.gain.setValueAtTime(vol, when + dur * 0.6);
+      g.gain.linearRampToValueAtTime(0, when + dur * 0.95);
+      osc.start(when); osc.stop(when + dur + 0.01);
+    }
+
+    function hihat(when) {
+      if (!hatBuf) {
+        const n = Math.floor(ctx.sampleRate * 0.05);
+        hatBuf = ctx.createBuffer(1, n, ctx.sampleRate);
+        const d = hatBuf.getChannelData(0);
+        for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+      }
+      const src = ctx.createBufferSource(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+      src.buffer = hatBuf; src.connect(f); f.connect(g); g.connect(ctx.destination);
+      f.type = 'highpass'; f.frequency.value = 7000;
+      g.gain.setValueAtTime(0.025, when);
+      g.gain.exponentialRampToValueAtTime(0.001, when + 0.03);
+      src.start(when); src.stop(when + 0.04);
+    }
+
+    function tick() {
+      while (nextTime < ctx.currentTime + 0.12) {
+        const d = s16(), i = step % 64;
+        tone(MEL[i], nextTime, d * 0.85, 'square', 0.10);
+        tone(BAS[i], nextTime, d * 1.6,  'square', 0.07);
+        if (i % 4 === 0) hihat(nextTime); // quarter-note hi-hat click
+        nextTime += d;
+        step++;
+      }
+      if (running) timer = setTimeout(tick, 20);
+    }
+
+    return {
+      start() {
+        if (ctx) ctx.close();
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        t0 = ctx.currentTime; step = 0; nextTime = t0 + 0.1; running = true; hatBuf = null;
+        tick();
+      },
+      stop() {
+        running = false; clearTimeout(timer);
+        if (ctx) { ctx.close(); ctx = null; }
+        hatBuf = null;
+      }
+    };
+  })();
+
   // ── Config ─────────────────────────────────────────────────────────────────
   const GAME_DURATION = 120; // seconds
   const MAX_LIVES = 3;
@@ -590,6 +681,7 @@
     updateTimerBar();
     nextWord();
     startTimer();
+    MUSIC.start();
     hiddenInput.focus();
   }
 
@@ -648,6 +740,7 @@
   function endGame(reason) {
     clearInterval(timerInterval);
     gameActive = false;
+    MUSIC.stop();
 
     const emoji = document.getElementById('gameOverEmoji');
     const title = document.getElementById('gameOverTitle');
