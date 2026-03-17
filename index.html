@@ -283,6 +283,103 @@
       flex-shrink: 0;
     }
 
+    /* ── High Score Page ── */
+    #highScorePage {
+      background: #414241;
+      justify-content: space-between;
+      gap: 0;
+      padding: 0;
+    }
+
+    .hs-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 40px 24px 0;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .hs-font-svg {
+      width: 100%;
+      max-width: 580px;
+      height: auto;
+    }
+
+    .hs-score {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 900;
+      font-size: clamp(80px, 17vw, 140px);
+      color: #fff4e9;
+      line-height: 1;
+    }
+
+    .hs-initials-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .hs-initials-label {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 400;
+      font-size: 18px;
+      color: #fff4e9;
+      opacity: 0.75;
+    }
+
+    .hs-initials-row {
+      display: flex;
+      gap: 20px;
+    }
+
+    .hs-box {
+      width: 88px;
+      height: 88px;
+      background: #fff4e9;
+      border: none;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 900;
+      font-size: 60px;
+      color: #414241;
+      text-align: center;
+      text-transform: uppercase;
+      outline: none;
+      cursor: pointer;
+      caret-color: transparent;
+    }
+
+    .hs-box:focus {
+      outline: 4px solid #fff4e9;
+      outline-offset: 3px;
+    }
+
+    .hs-confirm-btn {
+      margin-top: 12px;
+      background: #fff4e9;
+      color: #414241;
+      border: none;
+      padding: 14px 52px;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 900;
+      font-size: 22px;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .hs-confirm-btn:hover  { opacity: 0.85; }
+    .hs-confirm-btn:active { transform: scale(0.97); }
+
+    .hs-monster {
+      width: 100%;
+      max-width: 800px;
+      flex-shrink: 0;
+    }
+
     /* ── Start screen splash layout ── */
     #startScreen {
       background: #fff4e9;
@@ -343,9 +440,12 @@
     }
 
     #startScreen .high-score-initials {
-      font-size: 18px;
+      font-size: 40px;
+      font-weight: 900;
       color: #414241;
-      opacity: 0.55;
+      opacity: 1;
+      letter-spacing: 0.05em;
+      margin-top: 2px;
     }
 
     /* Alright / LETS GO! button */
@@ -742,6 +842,86 @@
   </div>
 </div>
 
+<!-- High Score Page -->
+<div class="overlay" id="highScorePage" style="display:none">
+  <div class="hs-content">
+
+    <!-- FONT layer: exact SVG from Paper Page 4 -->
+    <svg class="hs-font-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 644.71 333.9">
+      <!-- "Well, Well, Well..." small text -->
+      <g>
+        <path d="M156.21,26.29l.68,4.69,1-4.22,7.03-24.8h3.96l6.86,24.8.98,4.3.76-4.79,5.52-24.32h4.71l-8.62,35.55h-4.27l-7.32-25.9-.56-2.71-.56,2.71-7.59,25.9h-4.27L145.9,1.95h4.69l5.62,24.34Z" fill="#FFF4E9"/>
+        <path d="M201.9,37.99c-3.58,0-6.49-1.18-8.74-3.53-2.25-2.35-3.37-5.5-3.37-9.44v-.83c0-2.62.5-4.96,1.5-7.02,1-2.06,2.4-3.67,4.2-4.83,1.8-1.16,3.75-1.75,5.85-1.75,3.43,0,6.1,1.13,8.01,3.39,1.9,2.26,2.86,5.5,2.86,9.72v1.88h-17.9c.06,2.6.83,4.71,2.28,6.31,1.46,1.6,3.31,2.4,5.55,2.4,1.59,0,2.95-.33,4.05-.98,1.11-.65,2.08-1.51,2.91-2.59l2.76,2.15c-2.21,3.4-5.53,5.1-9.96,5.1ZM201.33,14.31c-1.82,0-3.35.66-4.59,1.99-1.24,1.33-2,3.19-2.29,5.58h13.23v-.34c-.13-2.29-.75-4.07-1.86-5.33-1.11-1.26-2.6-1.89-4.49-1.89Z" fill="#FFF4E9"/>
+        <path d="M221.83,37.5h-4.52V0h4.52v37.5Z" fill="#FFF4E9"/>
+        <path d="M233.46,37.5h-4.52V0h4.52v37.5Z" fill="#FFF4E9"/>
+        <path d="M240.04,44.58l-2.56-1.76c1.53-2.13,2.33-4.33,2.39-6.59v-4.08h4.42v3.54c0,1.64-.4,3.29-1.21,4.93-.8,1.64-1.82,2.96-3.04,3.96Z" fill="#FFF4E9"/>
+        <path d="M269.76,26.29l.68,4.69,1-4.22,7.03-24.8h3.96l6.86,24.8.98,4.3.76-4.79,5.52-24.32h4.71l-8.62,35.55h-4.27l-7.32-25.9-.56-2.71-.56,2.71-7.59,25.9h-4.27l-8.59-35.55h4.69l5.62,24.34Z" fill="#FFF4E9"/>
+        <path d="M315.45,37.99c-3.58,0-6.49-1.18-8.74-3.53-2.25-2.35-3.37-5.5-3.37-9.44v-.83c0-2.62.5-4.96,1.5-7.02,1-2.06,2.4-3.67,4.2-4.83,1.8-1.16,3.75-1.75,5.85-1.75,3.43,0,6.1,1.13,8.01,3.39,1.9,2.26,2.86,5.5,2.86,9.72v1.88h-17.9c.06,2.6.83,4.71,2.28,6.31,1.46,1.6,3.31,2.4,5.55,2.4,1.59,0,2.95-.33,4.05-.98,1.11-.65,2.08-1.51,2.91-2.59l2.76,2.15c-2.21,3.4-5.53,5.1-9.96,5.1ZM314.89,14.31c-1.82,0-3.35.66-4.59,1.99-1.24,1.33-2,3.19-2.29,5.58h13.23v-.34c-.13-2.29-.75-4.07-1.86-5.33-1.11-1.26-2.6-1.89-4.49-1.89Z" fill="#FFF4E9"/>
+        <path d="M335.38,37.5h-4.52V0h4.52v37.5Z" fill="#FFF4E9"/>
+        <path d="M347.02,37.5h-4.52V0h4.52v37.5Z" fill="#FFF4E9"/>
+        <path d="M353.6,44.58l-2.56-1.76c1.53-2.13,2.33-4.33,2.39-6.59v-4.08h4.42v3.54c0,1.64-.4,3.29-1.21,4.93-.8,1.64-1.82,2.96-3.04,3.96Z" fill="#FFF4E9"/>
+        <path d="M383.31,26.29l.68,4.69,1-4.22,7.03-24.8h3.96l6.86,24.8.98,4.3.76-4.79,5.52-24.32h4.71l-8.62,35.55h-4.27l-7.32-25.9-.56-2.71-.56,2.71-7.59,25.9h-4.27l-8.59-35.55h4.69l5.62,24.34Z" fill="#FFF4E9"/>
+        <path d="M429,37.99c-3.58,0-6.49-1.18-8.74-3.53-2.25-2.35-3.37-5.5-3.37-9.44v-.83c0-2.62.5-4.96,1.5-7.02,1-2.06,2.4-3.67,4.2-4.83,1.8-1.16,3.75-1.75,5.85-1.75,3.43,0,6.1,1.13,8.01,3.39,1.9,2.26,2.86,5.5,2.86,9.72v1.88h-17.9c.06,2.6.83,4.71,2.28,6.31,1.46,1.6,3.31,2.4,5.55,2.4,1.59,0,2.95-.33,4.05-.98,1.11-.65,2.08-1.51,2.91-2.59l2.76,2.15c-2.21,3.4-5.53,5.1-9.96,5.1ZM428.44,14.31c-1.82,0-3.35.66-4.59,1.99-1.24,1.33-2,3.19-2.29,5.58h13.23v-.34c-.13-2.29-.75-4.07-1.86-5.33-1.11-1.26-2.6-1.89-4.49-1.89Z" fill="#FFF4E9"/>
+        <path d="M448.94,37.5h-4.52V0h4.52v37.5Z" fill="#FFF4E9"/>
+        <path d="M460.57,37.5h-4.52V0h4.52v37.5Z" fill="#FFF4E9"/>
+        <path d="M467.39,35.13c0-.78.23-1.43.7-1.95.46-.52,1.16-.78,2.09-.78s1.63.26,2.11.78c.48.52.72,1.17.72,1.95s-.24,1.38-.72,1.88c-.48.5-1.18.76-2.11.76s-1.62-.25-2.09-.76c-.46-.5-.7-1.13-.7-1.88Z" fill="#FFF4E9"/>
+        <path d="M480.05,35.13c0-.78.23-1.43.7-1.95.46-.52,1.16-.78,2.09-.78s1.63.26,2.11.78c.48.52.72,1.17.72,1.95s-.24,1.38-.72,1.88c-.48.5-1.18.76-2.11.76s-1.62-.25-2.09-.76c-.46-.5-.7-1.13-.7-1.88Z" fill="#FFF4E9"/>
+        <path d="M492.71,35.13c0-.78.23-1.43.7-1.95.46-.52,1.16-.78,2.09-.78s1.63.26,2.11.78c.48.52.72,1.17.72,1.95s-.24,1.38-.72,1.88c-.48.5-1.18.76-2.11.76s-1.62-.25-2.09-.76c-.46-.5-.7-1.13-.7-1.88Z" fill="#FFF4E9"/>
+      </g>
+      <!-- "HIGH SCORE!!" large text -->
+      <g>
+        <path d="M227.19,185.57h-30v-52.26h-44.44v52.26h-30.17V60.41h30.17v49.69h44.44v-49.69h30v125.16Z" fill="#FFF4E9"/>
+        <path d="M278.43,185.57h-30.09V60.41h30.09v125.16Z" fill="#FFF4E9"/>
+        <path d="M401.87,170.09c-4.64,5.16-11.43,9.31-20.37,12.46-8.94,3.15-18.74,4.73-29.4,4.73-16.39,0-29.48-5.01-39.28-15.04-9.8-10.03-15.04-23.98-15.73-41.86l-.09-10.83c0-12.32,2.18-23.08,6.53-32.28,4.35-9.2,10.59-16.27,18.7-21.23,8.11-4.96,17.49-7.44,28.15-7.44,15.59,0,27.69,3.57,36.32,10.7,8.62,7.13,13.65,17.78,15.09,31.93h-29.05c-1.03-6.99-3.27-11.98-6.71-14.96-3.44-2.98-8.31-4.47-14.61-4.47-7.56,0-13.41,3.21-17.54,9.63-4.13,6.42-6.22,15.59-6.27,27.51v7.56c0,12.49,2.13,21.88,6.4,28.15,4.27,6.27,10.99,9.41,20.16,9.41,7.85,0,13.7-1.75,17.54-5.24v-19.43h-20.97v-20.72h51.15v51.4Z" fill="#FFF4E9"/>
+        <path d="M524.02,185.57h-30v-52.26h-44.44v52.26h-30.17V60.41h30.17v49.69h44.44v-49.69h30v125.16Z" fill="#FFF4E9"/>
+        <path d="M68.51,298.91c0-4.41-1.56-7.85-4.69-10.31-3.12-2.46-8.61-5.01-16.46-7.65-7.85-2.64-14.27-5.19-19.26-7.65-16.22-7.96-24.33-18.91-24.33-32.84,0-6.93,2.02-13.05,6.06-18.35,4.04-5.3,9.76-9.43,17.15-12.38,7.39-2.95,15.7-4.43,24.93-4.43s17.06,1.6,24.2,4.81c7.13,3.21,12.68,7.78,16.63,13.71,3.95,5.93,5.93,12.71,5.93,20.33h-30.09c0-5.1-1.56-9.05-4.69-11.86-3.12-2.81-7.35-4.21-12.68-4.21s-9.64,1.19-12.77,3.57c-3.12,2.38-4.68,5.4-4.68,9.07,0,3.21,1.72,6.12,5.16,8.73,3.44,2.61,9.48,5.3,18.14,8.08,8.65,2.78,15.76,5.77,21.32,8.98,13.52,7.79,20.29,18.54,20.29,32.24,0,10.95-4.13,19.54-12.38,25.79-8.25,6.25-19.57,9.37-33.96,9.37-10.14,0-19.33-1.82-27.55-5.46-8.22-3.64-14.41-8.62-18.57-14.96-4.16-6.33-6.23-13.62-6.23-21.88h30.26c0,6.71,1.73,11.65,5.2,14.83,3.47,3.18,9.1,4.77,16.89,4.77,4.99,0,8.93-1.07,11.82-3.22,2.89-2.15,4.34-5.17,4.34-9.07Z" fill="#FFF4E9"/>
+        <path d="M215.42,289.8c-.4,8.71-2.75,16.41-7.05,23.08-4.3,6.68-10.33,11.85-18.09,15.52-7.77,3.67-16.63,5.5-26.6,5.5-16.45,0-29.4-5.36-38.85-16.07-9.46-10.72-14.18-25.84-14.18-45.39v-6.19c0-12.26,2.13-22.99,6.4-32.19,4.27-9.2,10.42-16.3,18.44-21.32,8.02-5.01,17.31-7.52,27.85-7.52,15.19,0,27.39,4,36.62,11.99,9.23,7.99,14.47,19.01,15.73,33.05h-30.09c-.23-7.62-2.15-13.09-5.76-16.42-3.61-3.32-9.11-4.99-16.5-4.99s-13.01,2.81-16.5,8.42c-3.5,5.62-5.33,14.58-5.5,26.91v8.85c0,13.35,1.68,22.9,5.03,28.62,3.35,5.73,9.12,8.6,17.32,8.6,6.93,0,12.23-1.63,15.9-4.9,3.67-3.27,5.62-8.45,5.85-15.56h30Z" fill="#FFF4E9"/>
+        <path d="M335.68,272.18c0,12.21-2.26,23.01-6.79,32.41-4.53,9.4-10.96,16.63-19.3,21.71s-17.84,7.61-28.5,7.61-20.12-2.45-28.37-7.35-14.69-11.91-19.3-21.02c-4.61-9.11-7.04-19.57-7.26-31.38v-7.05c0-12.26,2.25-23.08,6.75-32.45,4.5-9.37,10.94-16.6,19.34-21.71,8.39-5.1,17.95-7.65,28.67-7.65s20.06,2.52,28.37,7.56c8.31,5.04,14.77,12.22,19.38,21.53,4.61,9.31,6.95,19.99,7.01,32.02v5.76ZM304.99,266.93c0-12.43-2.08-21.88-6.23-28.32-4.16-6.45-10.1-9.67-17.84-9.67-15.13,0-23.12,11.35-23.98,34.04l-.09,9.2c0,12.26,2.03,21.69,6.1,28.28,4.07,6.59,10.11,9.89,18.14,9.89s13.5-3.24,17.62-9.71c4.13-6.48,6.22-15.79,6.28-27.94v-5.76Z" fill="#FFF4E9"/>
+        <path d="M397.74,287.91h-16.33v44.27h-30.17v-125.16h49.25c14.84,0,26.45,3.29,34.81,9.87,8.37,6.58,12.55,15.89,12.55,27.91,0,8.7-1.76,15.91-5.29,21.64s-9.04,10.36-16.55,13.91l26.13,50.54v1.29h-32.32l-22.09-44.27ZM381.41,264.7h19.08c5.73,0,10.04-1.51,12.94-4.52,2.89-3.02,4.34-7.23,4.34-12.63s-1.46-9.64-4.38-12.71c-2.92-3.07-7.22-4.61-12.89-4.61h-19.08v34.47Z" fill="#FFF4E9"/>
+        <path d="M543.7,279.05h-47.45v29.91h56.05v23.21h-86.22v-125.16h86.39v23.3h-56.22v26.39h47.45v22.35Z" fill="#FFF4E9"/>
+        <path d="M563.99,319.2c0-4.24,1.53-7.72,4.6-10.44,3.06-2.72,6.89-4.08,11.48-4.08s8.41,1.36,11.48,4.08c3.07,2.72,4.6,6.2,4.6,10.44s-1.53,7.72-4.6,10.44c-3.07,2.72-6.89,4.08-11.48,4.08s-8.41-1.36-11.48-4.08c-3.07-2.72-4.6-6.2-4.6-10.44ZM592.01,292.55h-23.47l-3.7-85.53h30.86l-3.7,85.53Z" fill="#FFF4E9"/>
+        <path d="M612.56,319.2c0-4.24,1.53-7.72,4.6-10.44,3.06-2.72,6.89-4.08,11.48-4.08s8.41,1.36,11.48,4.08c3.07,2.72,4.6,6.2,4.6,10.44s-1.53,7.72-4.6,10.44c-3.07,2.72-6.89,4.08-11.48,4.08s-8.41-1.36-11.48-4.08c-3.07-2.72-4.6-6.2-4.6-10.44ZM640.58,292.55h-23.47l-3.7-85.53h30.86l-3.7,85.53Z" fill="#FFF4E9"/>
+      </g>
+    </svg>
+
+    <!-- Dynamic score number -->
+    <div class="hs-score" id="hsScore">0</div>
+
+    <!-- Initials entry -->
+    <div class="hs-initials-wrap">
+      <div class="hs-initials-label">Please enter your initials</div>
+      <div class="hs-initials-row">
+        <input class="hs-box" id="hsBox1" maxlength="1" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+        <input class="hs-box" id="hsBox2" maxlength="1" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+        <input class="hs-box" id="hsBox3" maxlength="1" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+      </div>
+      <button class="hs-confirm-btn" id="hsConfirmBtn">CONFIRM</button>
+    </div>
+
+  </div>
+
+  <!-- Same dark-bg monster as score page (cream polygon, cream eyes, dark teeth) -->
+  <div class="hs-monster">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 660 800 440" preserveAspectRatio="xMidYMax meet" style="width:100%;display:block;">
+      <polygon points="0 1100 800 1100 800 1055.16 0 860.08 0 1100" fill="#FFF4E9"/>
+      <g>
+        <circle cx="693.26" cy="779.42" r="56.66" fill="none" stroke="#FFF4E9" stroke-miterlimit="10" stroke-width="15.7"/>
+        <circle cx="702.54" cy="804.87" r="12.72" fill="#FFF4E9"/>
+      </g>
+      <g>
+        <circle cx="111.02" cy="747.72" r="56.66" fill="none" stroke="#FFF4E9" stroke-miterlimit="10" stroke-width="15.7"/>
+        <circle cx="123.74" cy="727.79" r="12.72" fill="#FFF4E9"/>
+      </g>
+      <path d="M400.47,939.01l-7.14,60.1c-2.93,24.68-25.31,42.3-49.99,39.37l-59.85-7.11c-24.68-2.93-42.3-25.31-39.37-49.99l7.14-60.1,149.21,17.72Z" fill="#414241"/>
+      <path d="M564.77,987.34l-18.42,57.66c-7.56,23.67-32.88,36.73-56.55,29.17l-57.41-18.34c-23.67-7.56-36.73-32.88-29.17-56.55l18.42-57.66,143.13,45.72Z" fill="#414241"/>
+      <path d="M681.4,1017.08l-10.21,43.31c-4.19,17.78-22.01,28.79-39.79,24.6l-43.12-10.17c-17.78-4.19-28.79-22.01-24.6-39.79l10.21-43.31,107.51,25.36Z" fill="#414241"/>
+      <path d="M800,1024.14l-2.23,44.44c-.92,18.24-16.45,32.29-34.69,31.38l-44.25-2.22c-18.24-.92-32.29-16.45-31.38-34.69l2.23-44.44,110.32,5.53Z" fill="#414241"/>
+      <path d="M127.2,884.76l-17.99,40.7c-7.38,16.71-26.92,24.27-43.62,16.88l-40.53-17.91c-16.71-7.38-24.27-26.92-16.88-43.62l17.99-40.7,101.03,44.66Z" fill="#414241"/>
+      <path d="M241.5,911.64l-10.21,43.31c-4.19,17.78-22.01,28.79-39.79,24.6l-43.12-10.17c-17.78-4.19-28.79-22.01-24.6-39.79l10.21-43.31,107.51,25.36Z" fill="#414241"/>
+    </svg>
+  </div>
+</div>
+
 <script>
   // ── Word list ──────────────────────────────────────────────────────────────
   const WORDS = [
@@ -1020,8 +1200,9 @@
   const passBtnEl    = document.getElementById('passBtn');
   const hiddenInput  = document.getElementById('hiddenInput');
   const startScreen  = document.getElementById('startScreen');
-  const gameOverScr  = document.getElementById('gameOverScreen');
-  const scorePageEl  = document.getElementById('scorePage');
+  const gameOverScr     = document.getElementById('gameOverScreen');
+  const scorePageEl     = document.getElementById('scorePage');
+  const highScorePageEl = document.getElementById('highScorePage');
 
   // ── Utilities ──────────────────────────────────────────────────────────────
   function shuffle(arr) {
@@ -1039,8 +1220,9 @@
 
   // ── Game control ───────────────────────────────────────────────────────────
   function startGame() {
-    startScreen.style.display  = 'none';
-    gameOverScr.style.display  = 'none';
+    startScreen.style.display     = 'none';
+    gameOverScr.style.display     = 'none';
+    highScorePageEl.style.display = 'none';
     lives       = MAX_LIVES;
     score       = 0;
     timeLeft    = GAME_DURATION;
@@ -1131,13 +1313,12 @@
     const isNewRecord = score > 0 && score > prev;
 
     if (isNewRecord) {
-      msg.textContent = '🏆 New high score! Amazing!';
-      const entry = document.getElementById('initialsEntry');
-      const input = document.getElementById('initialsInput');
-      entry.style.display = 'flex';
-      input.value = '';
-      setTimeout(() => input.focus(), 100);
-      gameOverScr.style.display = 'flex';
+      document.getElementById('hsScore').textContent = score;
+      document.getElementById('hsBox1').value = '';
+      document.getElementById('hsBox2').value = '';
+      document.getElementById('hsBox3').value = '';
+      highScorePageEl.style.display = 'flex';
+      setTimeout(() => document.getElementById('hsBox1').focus(), 150);
     } else {
       await loadHighScore();
       // Show score page with 5-second countdown back to splash
@@ -1300,7 +1481,7 @@
     const el = document.getElementById('highScoreDisplay');
     if (hs > 0) {
       document.getElementById('highScoreValue').textContent = hs;
-      document.getElementById('highScoreInitials').textContent = initials ? `— ${initials}` : '';
+      document.getElementById('highScoreInitials').textContent = initials || '';
       el.style.display = 'flex';
     } else {
       el.style.display = 'none';
@@ -1340,19 +1521,36 @@
     return true;
   }
 
-  // Initials confirm — saves and closes the entry box
-  async function confirmInitials() {
-    const raw = document.getElementById('initialsInput').value.trim().toUpperCase().replace(/[^A-Z]/g, '');
-    const initials = raw || '???';
-    document.getElementById('initialsEntry').style.display = 'none';
+  // High Score Page — three-box initials entry
+  async function confirmHighScore() {
+    const b1 = document.getElementById('hsBox1').value.trim().toUpperCase().replace(/[^A-Z]/g, '') || '?';
+    const b2 = document.getElementById('hsBox2').value.trim().toUpperCase().replace(/[^A-Z]/g, '') || '?';
+    const b3 = document.getElementById('hsBox3').value.trim().toUpperCase().replace(/[^A-Z]/g, '') || '?';
+    const initials = b1 + b2 + b3;
+    highScorePageEl.style.display = 'none';
     await saveHighScore(score, initials);
     await loadHighScore();
+    startScreen.style.display = 'flex';
   }
 
-  document.getElementById('initialsConfirm').addEventListener('click', confirmInitials);
-  document.getElementById('initialsInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') confirmInitials();
+  // Auto-advance between boxes
+  ['hsBox1', 'hsBox2', 'hsBox3'].forEach((id, i, ids) => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', () => {
+      el.value = el.value.toUpperCase().replace(/[^A-Z]/g, '').slice(-1);
+      if (el.value && i < ids.length - 1) {
+        document.getElementById(ids[i + 1]).focus();
+      }
+    });
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !el.value && i > 0) {
+        document.getElementById(ids[i - 1]).focus();
+      }
+      if (e.key === 'Enter') confirmHighScore();
+    });
   });
+
+  document.getElementById('hsConfirmBtn').addEventListener('click', confirmHighScore);
 
   // Load on startup
   loadHighScore();
