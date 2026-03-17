@@ -264,6 +264,68 @@
       letter-spacing: -0.02em;
     }
 
+    .high-score-initials {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #b0a99f;
+    }
+
+    /* ── Initials entry ── */
+    .initials-entry {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .initials-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: #6b6259;
+      letter-spacing: 0.01em;
+    }
+
+    .initials-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .initials-input {
+      width: 90px;
+      height: 56px;
+      border: 2px solid #d0cbc4;
+      border-radius: 12px;
+      background: white;
+      font-size: 28px;
+      font-weight: 800;
+      text-align: center;
+      text-transform: uppercase;
+      color: #2a2520;
+      letter-spacing: 0.15em;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .initials-input:focus { border-color: #E05252; }
+
+    .btn-confirm {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      border: none;
+      background: #4caf50;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn-confirm:hover  { background: #43a047; }
+    .btn-confirm:active { transform: scale(0.95); }
+
     /* ── Pass button ── */
     .btn-pass {
       background: none;
@@ -360,6 +422,7 @@
   <div class="high-score-display" id="highScoreDisplay" style="display:none">
     <span class="high-score-label">Best score</span>
     <span class="high-score-value" id="highScoreValue"></span>
+    <span class="high-score-initials" id="highScoreInitials"></span>
   </div>
   <button class="btn" id="startBtn">Let's go!</button>
 </div>
@@ -370,6 +433,26 @@
   <h1 id="gameOverTitle"></h1>
   <div class="final-score" id="finalScore"></div>
   <p id="gameOverMsg"></p>
+
+  <!-- Initials entry — only shown on a new record -->
+  <div class="initials-entry" id="initialsEntry" style="display:none">
+    <label class="initials-label" for="initialsInput">Enter your initials</label>
+    <div class="initials-row">
+      <input
+        id="initialsInput"
+        class="initials-input"
+        type="text"
+        maxlength="3"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="characters"
+        spellcheck="false"
+        placeholder="AAA"
+      >
+      <button class="btn-confirm" id="initialsConfirm">✓</button>
+    </div>
+  </div>
+
   <button class="btn" id="playAgainBtn">Play again</button>
 </div>
 
@@ -756,16 +839,27 @@
     }
 
     fs.textContent = `Score: ${score}`;
-    const isNewRecord = await saveHighScore(score);
-    msg.textContent = isNewRecord && score > 0
-      ? '🏆 New high score! Amazing!'
-      : score === 0
+
+    const prev = parseInt(localStorage.getItem(HS_KEY), 10) || 0;
+    const isNewRecord = score > 0 && score > prev;
+
+    if (isNewRecord) {
+      msg.textContent = '🏆 New high score! Amazing!';
+      const entry = document.getElementById('initialsEntry');
+      const input = document.getElementById('initialsInput');
+      entry.style.display = 'flex';
+      input.value = '';
+      setTimeout(() => input.focus(), 100);
+    } else {
+      document.getElementById('initialsEntry').style.display = 'none';
+      msg.textContent = score === 0
         ? "Don't worry, you'll do better next time!"
         : score === 1
           ? 'You spelled 1 word correctly. Great try!'
           : `You spelled ${score} words correctly. Well done!`;
+      await loadHighScore();
+    }
 
-    await loadHighScore(); // refresh the splash display with latest global score
     gameOverScr.style.display = 'flex';
   }
 
@@ -901,10 +995,11 @@
   // ── High score (global via JSONblob, localStorage as cache/fallback) ────────
   const BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019cf97f-a684-7291-85b4-cc9b48591da6';
 
-  function showHighScoreDisplay(hs) {
+  function showHighScoreDisplay(hs, initials) {
     const el = document.getElementById('highScoreDisplay');
     if (hs > 0) {
       document.getElementById('highScoreValue').textContent = hs;
+      document.getElementById('highScoreInitials').textContent = initials ? `— ${initials}` : '';
       el.style.display = 'flex';
     } else {
       el.style.display = 'none';
@@ -916,29 +1011,47 @@
       const res = await fetch(BLOB_URL, { headers: { Accept: 'application/json' } });
       const data = await res.json();
       const hs = data.highScore || 0;
-      localStorage.setItem(HS_KEY, hs); // keep local cache in sync
-      showHighScoreDisplay(hs);
+      const initials = data.initials || '';
+      localStorage.setItem(HS_KEY, hs);
+      localStorage.setItem(HS_KEY + '_initials', initials);
+      showHighScoreDisplay(hs, initials);
       return hs;
     } catch {
       const hs = parseInt(localStorage.getItem(HS_KEY), 10) || 0;
-      showHighScoreDisplay(hs);
+      const initials = localStorage.getItem(HS_KEY + '_initials') || '';
+      showHighScoreDisplay(hs, initials);
       return hs;
     }
   }
 
-  async function saveHighScore(newScore) {
+  async function saveHighScore(newScore, initials) {
     const prev = parseInt(localStorage.getItem(HS_KEY), 10) || 0;
     if (newScore <= prev) return false;
     localStorage.setItem(HS_KEY, newScore);
+    localStorage.setItem(HS_KEY + '_initials', initials);
     try {
       await fetch(BLOB_URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ highScore: newScore }),
+        body: JSON.stringify({ highScore: newScore, initials }),
       });
     } catch { /* silent fail — localStorage already updated */ }
     return true;
   }
+
+  // Initials confirm — saves and closes the entry box
+  async function confirmInitials() {
+    const raw = document.getElementById('initialsInput').value.trim().toUpperCase().replace(/[^A-Z]/g, '');
+    const initials = raw || '???';
+    document.getElementById('initialsEntry').style.display = 'none';
+    await saveHighScore(score, initials);
+    await loadHighScore();
+  }
+
+  document.getElementById('initialsConfirm').addEventListener('click', confirmInitials);
+  document.getElementById('initialsInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') confirmInitials();
+  });
 
   // Load on startup
   loadHighScore();
