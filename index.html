@@ -479,34 +479,78 @@
       letter-spacing: -0.01em;
     }
 
-    /* Splash high score — no box, just text */
-    #startScreen .high-score-display {
-      background: none;
-      border: none;
-      padding: 0;
+    /* Splash leaderboard */
+    #leaderboard {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 300px;
       gap: 0;
     }
 
-    #startScreen .high-score-label {
-      font-size: 18px;
+    .lb-heading {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
       color: #414241;
-      opacity: 0.55;
-      letter-spacing: 0.06em;
+      opacity: 0.4;
+      margin-bottom: 10px;
     }
 
-    #startScreen .high-score-value {
-      font-size: 72px;
-      color: #414241;
+    .lb-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
     }
 
-    #startScreen .high-score-initials {
-      font-size: 40px;
+    .lb-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      padding: 1px 0;
+    }
+
+    .lb-rank {
+      font-size: 10px;
       font-weight: 900;
       color: #414241;
-      opacity: 1;
-      letter-spacing: 0.05em;
-      margin-top: 2px;
+      opacity: 0.3;
+      width: 16px;
+      text-align: right;
+      flex-shrink: 0;
     }
+
+    .lb-initials {
+      font-size: 14px;
+      font-weight: 900;
+      color: #414241;
+      letter-spacing: 0.1em;
+      flex: 1;
+    }
+
+    .lb-score {
+      font-size: 14px;
+      font-weight: 900;
+      color: #414241;
+    }
+
+    .lb-row.lb-top1 .lb-initials,
+    .lb-row.lb-top1 .lb-score { font-size: 26px; }
+    .lb-row.lb-top1 .lb-rank  { font-size: 13px; opacity: 0.4; }
+
+    .lb-row.lb-top2 .lb-initials,
+    .lb-row.lb-top2 .lb-score { font-size: 19px; }
+    .lb-row.lb-top2 .lb-rank  { font-size: 11px; }
+
+    .lb-row.lb-top3 .lb-initials,
+    .lb-row.lb-top3 .lb-score { font-size: 16px; }
+    .lb-row.lb-top3 .lb-rank  { font-size: 10px; }
 
     /* Alright / LETS GO! button */
     .btn-start {
@@ -805,10 +849,9 @@
       <div class="splash-spell-or">Spell or</div>
       <div class="splash-die">DIE!!!!</div>
     </div>
-    <div class="high-score-display" id="highScoreDisplay" style="display:none">
-      <span class="high-score-label">High Score</span>
-      <span class="high-score-value" id="highScoreValue"></span>
-      <span class="high-score-initials" id="highScoreInitials"></span>
+    <div id="leaderboard" style="display:none">
+      <div class="lb-heading">High Scores</div>
+      <ol id="leaderboardList" class="lb-list"></ol>
     </div>
     <button class="btn-start" id="startBtn">
       <span class="btn-start-sub">Alright</span>
@@ -1357,7 +1400,7 @@
   // ── Config ─────────────────────────────────────────────────────────────────
   const GAME_DURATION = 120; // seconds
   const MAX_LIVES = 3;
-  const HS_KEY = 'spellingGame_highScore';
+  const HS_KEY = 'spellingGame_highScore'; // legacy key (unused — replaced by LB_KEY)
 
   // ── State ──────────────────────────────────────────────────────────────────
   let lives, score, timeLeft, timerInterval, currentWord, typed, wordPool, feedbackTimeout, gameActive, gracePeriod;
@@ -1484,9 +1527,10 @@
 
     fs.textContent = `Score: ${score}`;
 
-    // Always fetch the live global score before deciding — fixes cross-device divergence
-    const prev = await loadHighScore();
-    const isNewRecord = score > 0 && score >= prev;
+    // Always fetch the live leaderboard before deciding — fixes cross-device divergence
+    await loadHighScore();
+    const board = _leaderboard;
+    const isNewRecord = score > 0 && (board.length < 10 || score >= board[board.length - 1].score);
 
     if (isNewRecord) {
       document.getElementById('hsScore').textContent = score;
@@ -1658,58 +1702,64 @@
   document.getElementById('playAgainBtn').addEventListener('click', startGame);
   passBtnEl.addEventListener('click', passWord);
 
-  // ── High score (Firebase Realtime Database, localStorage as offline fallback) ─
-  const FB_URL = 'https://spell-or-die-default-rtdb.firebaseio.com/highscore.json';
+  // ── Leaderboard (Firebase Realtime Database, localStorage as offline fallback) ─
+  const FB_URL = 'https://spell-or-die-default-rtdb.firebaseio.com/leaderboard.json';
+  const LB_KEY = 'spellingGame_leaderboard';
+  let _leaderboard = [];
 
-  function showHighScoreDisplay(hs, initials) {
-    const el = document.getElementById('highScoreDisplay');
-    if (hs > 0) {
-      document.getElementById('highScoreValue').textContent = hs;
-      document.getElementById('highScoreInitials').textContent = initials || '';
-      el.style.display = 'flex';
-    } else {
-      el.style.display = 'none';
-    }
-  }
-
-  async function fetchGlobalScore() {
+  async function fetchLeaderboard() {
     const res = await fetch(FB_URL, { cache: 'no-store' });
     const data = await res.json();
-    return { hs: data.score || 0, initials: data.initials || '' };
+    return Array.isArray(data) ? data : [];
+  }
+
+  function showLeaderboard(board) {
+    const el = document.getElementById('leaderboard');
+    const list = document.getElementById('leaderboardList');
+    if (!board || board.length === 0) { el.style.display = 'none'; return; }
+    list.innerHTML = '';
+    board.forEach((entry, i) => {
+      const li = document.createElement('li');
+      const cls = i === 0 ? ' lb-top1' : i === 1 ? ' lb-top2' : i === 2 ? ' lb-top3' : '';
+      li.className = 'lb-row' + cls;
+      li.innerHTML =
+        `<span class="lb-rank">${i + 1}</span>` +
+        `<span class="lb-initials">${entry.initials || '???'}</span>` +
+        `<span class="lb-score">${entry.score}</span>`;
+      list.appendChild(li);
+    });
+    el.style.display = 'flex';
   }
 
   async function loadHighScore() {
     try {
-      const { hs, initials } = await fetchGlobalScore();
-      localStorage.setItem(HS_KEY, hs);
-      localStorage.setItem(HS_KEY + '_initials', initials);
-      showHighScoreDisplay(hs, initials);
-      return hs;
+      _leaderboard = await fetchLeaderboard();
+      localStorage.setItem(LB_KEY, JSON.stringify(_leaderboard));
+      showLeaderboard(_leaderboard);
+      return _leaderboard.length > 0 ? _leaderboard[0].score : 0;
     } catch {
-      const hs = parseInt(localStorage.getItem(HS_KEY), 10) || 0;
-      const initials = localStorage.getItem(HS_KEY + '_initials') || '';
-      showHighScoreDisplay(hs, initials);
-      return hs;
+      try { _leaderboard = JSON.parse(localStorage.getItem(LB_KEY)) || []; } catch { _leaderboard = []; }
+      showLeaderboard(_leaderboard);
+      return _leaderboard.length > 0 ? _leaderboard[0].score : 0;
     }
   }
 
   async function saveHighScore(newScore, initials) {
-    // Always check live global score before writing — prevents cross-device overwrite
-    let globalPrev = 0;
+    let board;
     try {
-      const { hs } = await fetchGlobalScore();
-      globalPrev = hs;
+      board = await fetchLeaderboard();
     } catch {
-      globalPrev = parseInt(localStorage.getItem(HS_KEY), 10) || 0;
+      try { board = JSON.parse(localStorage.getItem(LB_KEY)) || []; } catch { board = []; }
     }
-    if (newScore <= globalPrev) return false;
-    localStorage.setItem(HS_KEY, newScore);
-    localStorage.setItem(HS_KEY + '_initials', initials);
+    board.push({ score: newScore, initials });
+    board.sort((a, b) => b.score - a.score);
+    board = board.slice(0, 10);
+    localStorage.setItem(LB_KEY, JSON.stringify(board));
     try {
       await fetch(FB_URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ score: newScore, initials }),
+        body: JSON.stringify(board),
       });
     } catch { /* silent fail — localStorage already updated */ }
     return true;
