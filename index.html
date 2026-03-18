@@ -1658,8 +1658,8 @@
   document.getElementById('playAgainBtn').addEventListener('click', startGame);
   passBtnEl.addEventListener('click', passWord);
 
-  // ── High score (global via JSONblob, localStorage as cache/fallback) ────────
-  const BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019d0131-79eb-7c77-85f4-e5d6beb1cdf3';
+  // ── High score (Firebase Realtime Database, localStorage as offline fallback) ─
+  const FB_URL = 'https://spell-or-die-default-rtdb.firebaseio.com/highscore.json';
 
   function showHighScoreDisplay(hs, initials) {
     const el = document.getElementById('highScoreDisplay');
@@ -1672,12 +1672,15 @@
     }
   }
 
+  async function fetchGlobalScore() {
+    const res = await fetch(FB_URL, { cache: 'no-store' });
+    const data = await res.json();
+    return { hs: data.score || 0, initials: data.initials || '' };
+  }
+
   async function loadHighScore() {
     try {
-      const res = await fetch(BLOB_URL, { headers: { Accept: 'application/json' }, cache: 'no-store' });
-      const data = await res.json();
-      const hs = data.highScore || 0;
-      const initials = data.initials || '';
+      const { hs, initials } = await fetchGlobalScore();
       localStorage.setItem(HS_KEY, hs);
       localStorage.setItem(HS_KEY + '_initials', initials);
       showHighScoreDisplay(hs, initials);
@@ -1691,12 +1694,11 @@
   }
 
   async function saveHighScore(newScore, initials) {
-    // Fetch live global score first so we never overwrite a higher score from another device
+    // Always check live global score before writing — prevents cross-device overwrite
     let globalPrev = 0;
     try {
-      const res = await fetch(BLOB_URL, { headers: { Accept: 'application/json' }, cache: 'no-store' });
-      const data = await res.json();
-      globalPrev = data.highScore || 0;
+      const { hs } = await fetchGlobalScore();
+      globalPrev = hs;
     } catch {
       globalPrev = parseInt(localStorage.getItem(HS_KEY), 10) || 0;
     }
@@ -1704,10 +1706,10 @@
     localStorage.setItem(HS_KEY, newScore);
     localStorage.setItem(HS_KEY + '_initials', initials);
     try {
-      await fetch(BLOB_URL, {
+      await fetch(FB_URL, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ highScore: newScore, initials }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ score: newScore, initials }),
       });
     } catch { /* silent fail — localStorage already updated */ }
     return true;
