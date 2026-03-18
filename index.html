@@ -487,6 +487,7 @@
       width: 100%;
       max-width: 300px;
       gap: 0;
+      /* always visible — JS replaces list contents, never hides the container */
     }
 
     .lb-heading {
@@ -857,9 +858,11 @@
       <div class="splash-spell-or">Spell or</div>
       <div class="splash-die">DIE!!!!</div>
     </div>
-    <div id="leaderboard" style="display:none">
+    <div id="leaderboard">
       <div class="lb-heading">High Scores</div>
-      <ol id="leaderboardList" class="lb-list"></ol>
+      <ol id="leaderboardList" class="lb-list">
+        <li class="lb-row lb-empty"><span class="lb-empty-text">Loading…</span></li>
+      </ol>
     </div>
     <button class="btn-start" id="startBtn">
       <span class="btn-start-sub">Alright</span>
@@ -1722,11 +1725,9 @@
   }
 
   function showLeaderboard(board) {
-    const el = document.getElementById('leaderboard');
     const list = document.getElementById('leaderboardList');
     if (!board || board.length === 0) {
       list.innerHTML = '<li class="lb-row lb-empty"><span class="lb-empty-text">No scores yet — be the first!</span></li>';
-      el.style.display = 'flex';
       return;
     }
     list.innerHTML = '';
@@ -1740,7 +1741,6 @@
         `<span class="lb-score">${entry.score}</span>`;
       list.appendChild(li);
     });
-    el.style.display = 'flex';
   }
 
   async function loadHighScore() {
