@@ -552,6 +552,14 @@
     .lb-row.lb-top3 .lb-score { font-size: 19px; }
     .lb-row.lb-top3 .lb-rank  { font-size: 11px; }
 
+    .lb-empty-text {
+      font-size: 14px;
+      font-weight: 400;
+      color: #414241;
+      opacity: 0.45;
+      letter-spacing: 0.02em;
+    }
+
     /* Alright / LETS GO! button */
     .btn-start {
       background: #414241;
@@ -1716,7 +1724,11 @@
   function showLeaderboard(board) {
     const el = document.getElementById('leaderboard');
     const list = document.getElementById('leaderboardList');
-    if (!board || board.length === 0) { el.style.display = 'none'; return; }
+    if (!board || board.length === 0) {
+      list.innerHTML = '<li class="lb-row lb-empty"><span class="lb-empty-text">No scores yet — be the first!</span></li>';
+      el.style.display = 'flex';
+      return;
+    }
     list.innerHTML = '';
     board.forEach((entry, i) => {
       const li = document.createElement('li');
