@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Spelling Game</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;900&display=swap" rel="stylesheet">
@@ -15,12 +15,14 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      min-height: 100vh;
+      min-height: 100svh;
       padding: 24px 16px;
+      overflow-y: auto;
     }
 
     .game-container {
-      width: 800px;
+      width: 100%;
+      max-width: 800px;
       display: flex;
       flex-direction: column;
       gap: 16px;
@@ -89,14 +91,14 @@
     }
 
     .window-icon {
-      height: 380px;
+      height: clamp(180px, 35vw, 380px);
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .icon-display {
-      font-size: 180px;
+      font-size: clamp(90px, 18vw, 180px);
       line-height: 1;
       user-select: none;
     }
@@ -125,15 +127,15 @@
     }
 
     .letter-box {
-      width: 68px;
-      height: 68px;
+      width: clamp(40px, 8.5vw, 68px);
+      height: clamp(40px, 8.5vw, 68px);
       border-radius: 0;
       border: 3px solid #414241;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'Roboto', sans-serif;
-      font-size: 34px;
+      font-size: clamp(20px, 4.2vw, 34px);
       font-weight: 900;
       color: #414241;
       text-transform: uppercase;
@@ -1398,7 +1400,8 @@
         activeMel = song.mel; activeBas = song.bas;
         ctx = new (window.AudioContext || window.webkitAudioContext)();
         t0 = ctx.currentTime; step = 0; nextTime = t0 + 0.1; running = true; hatBuf = null;
-        tick();
+        // iOS suspends AudioContext even on user gesture — resume() required
+        ctx.resume().then(tick);
       },
       stop() {
         running = false; clearTimeout(timer);
